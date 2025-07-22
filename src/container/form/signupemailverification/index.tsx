@@ -96,8 +96,8 @@ export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ for
             </Box>
             <Grid
                 container
-                spacing={"var(--flex-gap)"}
                 justifyContent={"space-between"}
+                spacing={{ mobile: "calc(var(--flex-gap)/2)", laptop: "var(--flex-gap)" }}
             >
                 {otp.map((digit, index) => (
                     <Grid
@@ -109,7 +109,6 @@ export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ for
                             <BaseInput
                                 required
                                 value={digit}
-                                sx={{ textAlign: "center" }}
                                 inputProps={{ maxLength: 1 }}
                                 onChange={(e) => handleChange(e, index)}
                                 onKeyDown={(e) => handleNavigate(e, index)}
