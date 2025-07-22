@@ -97,10 +97,12 @@ export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ for
             <Grid
                 container
                 spacing={"var(--flex-gap)"}
+                justifyContent={"space-between"}
             >
                 {otp.map((digit, index) => (
                     <Grid
                         key={index}
+                        flexGrow={1}
                         size={{ mobile: 2 }}
                     >
                         <BaseFieldSet>
