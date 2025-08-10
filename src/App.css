@@ -16,7 +16,12 @@
     --form-header-color: #2A2E34;
     --form-label-color: #4F5762;
     --form-input-color: #808080;
+    --form-label-border-color: #E9EAEB;
     --error-red-color: #FF0000;
+    --subtitle-grey-color: #656F7D;
+    --form-field-error-color: #FFE6E4;
+    --form-field-error-border-color: #FF3B2D;
+    --stepper-color: #FFAB051A;
 
     --basic-padding: 2rem;
     --basic-margin: 2rem;
@@ -24,7 +29,7 @@
   }
 
   .loader {
-    width: calc(0.75 * var(--basic-padding)) !important;
+    width: calc(0.5 * var(--basic-padding)) !important;
     height: auto !important;
   }
 

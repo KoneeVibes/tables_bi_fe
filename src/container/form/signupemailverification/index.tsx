@@ -9,13 +9,14 @@ import { BaseFieldSet } from "../../../component/form/fieldset/styled";
 import { BaseInput } from "../../../component/form/input/styled";
 import { AppContext } from "../../../context/appContext";
 
-export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ formDetails, setFormDetails }) => {
+export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ error, setError, formDetails, setFormDetails }) => {
     const {
         setSignUpActiveTabIndex
     } = useContext(AppContext);
 
     const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
     const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
+    const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, index: number) => {
         const value = e.target.value;
@@ -46,6 +47,7 @@ export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ for
 
     const handleNavigateToSignUp = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         e.preventDefault();
+        setError && setError(null);
         return setSignUpActiveTabIndex(0);
     };
 
@@ -87,7 +89,6 @@ export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ for
                     fontSize={"14px"}
                     lineHeight={"normal"}
                     color="var(--dark-color)"
-                    textAlign={"center"}
                     whiteSpace={"normal"}
                     marginBlockStart={"calc(var(--basic-margin)/4)"}
                 >
@@ -112,7 +113,16 @@ export const SignUpEmailVerificationForm: React.FC<SignUpFormPropsType> = ({ for
                                 inputProps={{ maxLength: 1 }}
                                 onChange={(e) => handleChange(e, index)}
                                 onKeyDown={(e) => handleNavigate(e, index)}
+                                onFocus={() => setFocusedIndex(index)}
+                                onBlur={() => setFocusedIndex(null)}
                                 inputRef={(el) => (inputRefs.current[index] = el)}
+                                border={
+                                    error ? "1px solid var(--form-field-error-border-color)"
+                                        : focusedIndex === index
+                                            ? "1px solid var(--primary-color)"
+                                            : "1px solid var(--border-color)"
+                                }
+                                bgcolor={error ? "var(--form-field-error-color)" : "transparent"}
                             />
                         </BaseFieldSet>
                     </Grid>

@@ -163,6 +163,7 @@ export const SignIn = () => {
                         type="submit"
                         variant="contained"
                         disableElevation
+                        disabled={isLoading}
                         sx={{ width: "100%" }}
                     >
                         {isLoading ? (

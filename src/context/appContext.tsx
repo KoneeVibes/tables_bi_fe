@@ -8,6 +8,7 @@ export const AppContextProvider: React.FC<ContextProviderPropsType> = ({ childre
     const [isSideNavigationClosing, setIsSideNavigationClosing] = useState(false);
     const [activeNavItem, setActiveNavItem] = useState<string | undefined>(undefined);
     const [isMobileSideNavigationOpen, setIsMobileSideNavigationOpen] = useState(false);
+    const [profileCompletionActiveTabIndex, setProfileCompletionActiveTabIndex] = useState(0);
 
     return (
         <AppContext.Provider
@@ -19,7 +20,9 @@ export const AppContextProvider: React.FC<ContextProviderPropsType> = ({ childre
                 activeNavItem,
                 setActiveNavItem,
                 signUpActiveTabIndex,
-                setSignUpActiveTabIndex
+                setSignUpActiveTabIndex,
+                profileCompletionActiveTabIndex,
+                setProfileCompletionActiveTabIndex
             }}
         >
             {children}

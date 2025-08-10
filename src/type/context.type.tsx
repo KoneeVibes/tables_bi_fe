@@ -11,4 +11,6 @@ export type AppContextType = {
     setActiveNavItem: React.Dispatch<React.SetStateAction<string | undefined>>
     signUpActiveTabIndex: number
     setSignUpActiveTabIndex: React.Dispatch<React.SetStateAction<number>>
+    profileCompletionActiveTabIndex: number
+    setProfileCompletionActiveTabIndex: React.Dispatch<React.SetStateAction<number>>
 };

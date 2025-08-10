@@ -3,6 +3,8 @@ export type AuthLayoutPropsType = {
 };
 
 export type SignUpFormPropsType = {
-    formDetails: Record<string, any>
+    error?: string | null,
+    setError?: React.Dispatch<React.SetStateAction<string | null>>,
+    formDetails: Record<string, any>,
     setFormDetails: React.Dispatch<React.SetStateAction<Record<string, any>>>
 };
