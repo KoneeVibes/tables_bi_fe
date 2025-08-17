@@ -1,0 +1,11 @@
+export { ReactComponent as SideNavigationDashboardIcon } from "../asset/icon/side-navigation-dashboard-icon.svg";
+export { ReactComponent as SideNavigationConnectionIcon } from "../asset/icon/side-navigation-connection-icon.svg";
+export { ReactComponent as SideNavigationSavedViewIcon } from "../asset/icon/side-navigation-saved-view-icon.svg";
+export { ReactComponent as SideNavigationSettingIcon } from "../asset/icon/side-navigation-settings-icon.svg";
+export { ReactComponent as TopNavigationNotificationIcon } from "../asset/icon/top-navigation-notification-icon.svg";
+export { ReactComponent as SideNavigationLogoutIcon } from "../asset/icon/side-navigation-logout-icon.svg";
+export { ReactComponent as UserMenuProfileIcon } from "../asset/icon/user-menu-profile-icon.svg";
+export { ReactComponent as UserMenuNotificationIcon } from "../asset/icon/user-menu-notification-icon.svg";
+export { ReactComponent as UserMenuSettingIcon } from "../asset/icon/user-menu-setting-icon.svg";
+export { ReactComponent as UserMenuHelpIcon } from "../asset/icon/user-menu-help-icon.svg";
+export { ReactComponent as UserMenuLogoutIcon } from "../asset/icon/user-menu-logout-icon.svg";

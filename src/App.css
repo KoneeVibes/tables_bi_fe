@@ -1,39 +1,184 @@
 @media screen and (min-width: 0px) {
+	html,
+	body,
+	#root {
+		box-sizing: border-box;
+		margin: 0;
+		min-height: 100vh;
+		background-color: var(--light-color);
 
-  html,
-  body,
-  #root {
-    box-sizing: border-box;
-    margin: 0;
-    min-height: 100vh;
-    background-color: var(--light-color);
+		--primary-color: #ffab05;
+		--light-color: #ffffff;
+		--dark-color: #000000;
+		--shiny-black-color: #0b0b0b;
+		--border-color: #e5e7ef;
+		--form-header-color: #2a2e34;
+		--form-label-color: #4f5762;
+		--form-input-color: #808080;
+		--form-label-border-color: #e9eaeb;
+		--error-red-color: #ff0000;
+		--subtitle-grey-color: #656f7d;
+		--subtitle-dark-color: #1b1b1b;
+		--form-field-error-color: #ffe6e4;
+		--form-field-error-border-color: #ff3b2d;
+		--stepper-color: #ffab051a;
+		--side-nav-off-white-bg-color: #f6f6f6;
+		--menu-item-hover-bg-color: #f7f7f7;
 
-    --primary-color: #FFAB05;
-    --light-color: #FFFFFF;
-    --dark-color: #000000;
-    --shiny-black-color: #0B0B0B;
-    --border-color: #E5E7EF;
-    --form-header-color: #2A2E34;
-    --form-label-color: #4F5762;
-    --form-input-color: #808080;
-    --form-label-border-color: #E9EAEB;
-    --error-red-color: #FF0000;
-    --subtitle-grey-color: #656F7D;
-    --form-field-error-color: #FFE6E4;
-    --form-field-error-border-color: #FF3B2D;
-    --stepper-color: #FFAB051A;
+		--basic-padding: 2rem;
+		--basic-margin: 2rem;
+		--flex-gap: 2rem;
 
-    --basic-padding: 2rem;
-    --basic-margin: 2rem;
-    --flex-gap: 2rem;
-  }
+		--side-nav-width: 100%;
+		--top-nav-height: 1.75rem;
+		--side-navigation-header-height: 4.05rem;
+	}
 
-  .loader {
-    width: calc(0.5 * var(--basic-padding)) !important;
-    height: auto !important;
-  }
+	.loader {
+		width: calc(0.5 * var(--basic-padding)) !important;
+		height: auto !important;
+	}
 
-  * {
-    /* outline: 1px red solid; */
-  }
+	* {
+		/* outline: 1px red solid; */
+	}
+
+	/* below are styles pertaining to the side-navigation bar */
+
+	/* styles for the side navigation header comprising of the logo and close button  */
+	.side-navigation-header {
+		gap: calc(var(--flex-gap) / 4);
+		justify-content: space-between !important;
+		height: var(--side-navigation-header-height);
+		padding: calc(var(--basic-padding) / 4) calc(var(--basic-padding) / 2);
+	}
+
+	/* For the side navigation header, styles for the app icon */
+	/* For each side navigation item, styles for the corresponding icon */
+	.side-navigation-header .app-icon,
+	.Side-Nav-Item .MuiListItemIcon-root {
+		flex: 0 1 24px;
+		overflow: hidden;
+		min-width: 0px;
+	}
+
+	/* For the side navigation header, styles for the app icon to counter flex property alone*/
+	.side-navigation-header .app-icon {
+		flex: 0 1 auto;
+	}
+
+	/* For the side navigation header, styles for the logo image itself */
+	.side-navigation-header .app-icon > img {
+		width: 100%;
+		height: auto;
+	}
+
+	/* For the side navigation header, styles for the close icon */
+	.side-navigation-header .close-button {
+		flex: 0 1 auto;
+		overflow: hidden;
+	}
+
+	/* For each side navigation item, styles for the corresponding text element container */
+	.Side-Nav-Item .MuiListItemText-root {
+		flex: 1 1 0;
+		overflow: hidden;
+	}
+
+	/* For each side navigation item, styles for the corresponding text element (span)*/
+	.Side-Nav-Item .MuiListItemText-root > .MuiTypography-root {
+		font-family: "Inter";
+		font-weight: 500;
+		font-size: 14px;
+		line-height: normal;
+	}
+
+	/* For each side navigation item, styles for the button element */
+	.Side-Nav-Item .MuiListItemButton-root {
+		border-radius: 10px;
+		gap: calc(var(--flex-gap));
+	}
+
+	/* For each side navigation item, styles for the button on hover */
+	.Side-Nav-Item:hover .MuiListItemButton-root {
+		color: var(--light-color);
+		background: var(--primary-color);
+	}
+
+	/* For each side navigation item, styles for the corresponding icon (to catch svg>path) */
+	.Side-Nav-Item:hover
+		.MuiListItemButton-root
+		.MuiListItemIcon-root
+		> svg
+		> path {
+		stroke: var(--light-color);
+	}
+
+	/* For each page, style the corresponding side nav item */
+	#Dashboard .Dashboard-Side-Nav-Item .MuiListItemButton-root,
+	#Connection .Connections-Side-Nav-Item .MuiListItemButton-root,
+	#Saved-View .Saved-View-Side-Nav-Item .MuiListItemButton-root,
+	#Setting .Settings-Side-Nav-Item .MuiListItemButton-root {
+		color: var(--light-color);
+		background: var(--primary-color);
+	}
+
+	/* For each page, style the corresponding side nav item to catch svg>path */
+	#Dashboard
+		.Dashboard-Side-Nav-Item
+		.MuiListItemButton-root
+		.MuiListItemIcon-root
+		> svg
+		> path,
+	#Connection
+		.Connections-Side-Nav-Item
+		.MuiListItemButton-root
+		.MuiListItemIcon-root
+		> svg
+		> path,
+	#Saved-View
+		.Saved-View-Side-Nav-Item
+		.MuiListItemButton-root
+		.MuiListItemIcon-root
+		> svg
+		> path,
+	#Setting
+		.Settings-Side-Nav-Item
+		.MuiListItemButton-root
+		.MuiListItemIcon-root
+		> svg
+		> path {
+		stroke: var(--light-color);
+	}
+
+	/* below are styles pertaining to the top navigation bar */
+	.top-navigation-user-menu-dropdown .MuiDialog-container {
+		right: 0;
+		height: auto;
+		position: absolute;
+		top: var(--side-navigation-header-height);
+	}
+
+	.top-navigation-user-menu-dropdown .MuiDialog-paper {
+		width: 250px;
+		max-height: 400px;
+		border-radius: 12px;
+		margin: 0 var(--basic-margin) 0;
+	}
+}
+
+@media screen and (min-width: 425px) {
+	html,
+	body,
+	#root {
+		--side-nav-width: 15.625rem;
+	}
+}
+
+@media screen and (min-width: 768px) {
+	html,
+	body,
+	#root {
+		--side-navigation-header-height: 4.55rem;
+	}
 }
