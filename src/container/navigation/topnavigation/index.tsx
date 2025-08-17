@@ -77,6 +77,18 @@ export const TopNavigation: React.FC<TopNavigationPropsType> = ({
 		}
 	};
 
+	const getUserInitials = (fullName: string) => {
+		if (!fullName) return "";
+
+		const parts = fullName.trim().split(/\s+/);
+		if (parts.length < 2) return parts[0][0].toUpperCase();
+
+		const first = parts[0][0].toUpperCase();
+		const last = parts[parts.length - 1][0].toUpperCase();
+
+		return first + last;
+	};
+
 	const userMenuHeader = (
 		<Stack
 			direction={"row"}
@@ -84,7 +96,9 @@ export const TopNavigation: React.FC<TopNavigationPropsType> = ({
 			padding={"calc(var(--basic-padding) * 0.75)"}
 			borderBottom={"1px solid var(--form-label-border-color)"}
 		>
-			<Avatar sx={{ background: "var(--primary-color)" }}>BO</Avatar>
+			<Avatar sx={{ background: "var(--primary-color)" }}>
+				{getUserInitials(username)}
+			</Avatar>
 			<Stack>
 				<Box>
 					<Typography
