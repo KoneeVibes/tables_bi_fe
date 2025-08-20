@@ -31,17 +31,17 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
 		e.preventDefault();
-		console.log("I have been hit");
 		try {
 			const response = await signOutUser(TOKEN);
 			if (response.status === "success") {
 				cookies.remove("TOKEN", { path: "/" });
-				navigate("/", { replace: true });
 			} else {
 				console.error("Logout failed. Try again");
 			}
 		} catch (error: any) {
 			console.error("Logout failed, Contact Admin:", error);
+		} finally {
+			navigate("/", { replace: true });
 		}
 	};
 

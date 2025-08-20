@@ -8,6 +8,14 @@ import {
 	UserMenuProfileIcon,
 	UserMenuSettingIcon,
 } from "../asset";
+import encryptionIcon from "../asset/icon/encryption-icon.svg";
+import timeIcon from "../asset/icon/time-icon.svg";
+import dbIcon from "../asset/icon/db-icon.svg";
+import helpIcon from "../asset/icon/help-icon.svg";
+import mySQLIcon from "../asset/icon/my-sql-icon.svg";
+import postgreSQLIcon from "../asset/icon/postgres-sql-icon.svg";
+import sqlServerIcon from "../asset/icon/sql-server-icon.svg";
+import otherDBIcon from "../asset/icon/other-db-icon.svg";
 
 export const sideNavigationItems = [
 	{
@@ -57,4 +65,18 @@ export const userMenuItems = [
 		icon: <UserMenuHelpIcon />,
 		url: "/",
 	},
+];
+
+export const coreFeatures = [
+	{ icon: encryptionIcon, description: "Encrypted & secure by default" },
+	{ icon: timeIcon, description: "Get set up in under 2 minutes" },
+	{ icon: dbIcon, description: "Auto-detects tables and relationships" },
+	{ icon: helpIcon, description: "Real-time support if you need help" },
+];
+
+export const supportedDataSources = [
+	{ icon: mySQLIcon, name: "MySQL" },
+	{ icon: postgreSQLIcon, name: "PostgreSQL" },
+	{ icon: sqlServerIcon, name: "SQL-Server" },
+	{ icon: otherDBIcon, name: "Others" },
 ];

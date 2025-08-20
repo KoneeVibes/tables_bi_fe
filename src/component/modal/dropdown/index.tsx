@@ -1,8 +1,8 @@
-import { BaseDropDownWrapper } from "./styled";
+import { BaseDropDownModalWrapper } from "./styled";
 import { Box, MenuItem, Typography } from "@mui/material";
-import { BaseDropDownPropsType } from "../../../type/component.type";
+import { BaseDropDownModalPropsType } from "../../../type/component.type";
 
-export const BaseDropDown: React.FC<BaseDropDownPropsType> = ({
+export const BaseDropDownModal: React.FC<BaseDropDownModalPropsType> = ({
 	open,
 	items,
 	header,
@@ -12,7 +12,7 @@ export const BaseDropDown: React.FC<BaseDropDownPropsType> = ({
 	handleItemClick,
 }) => {
 	return (
-		<BaseDropDownWrapper
+		<BaseDropDownModalWrapper
 			open={open}
 			onClose={handleClose}
 			className={className}
@@ -45,6 +45,6 @@ export const BaseDropDown: React.FC<BaseDropDownPropsType> = ({
 				})}
 			</ul>
 			{footer}
-		</BaseDropDownWrapper>
+		</BaseDropDownModalWrapper>
 	);
 };

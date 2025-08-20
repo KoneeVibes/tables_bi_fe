@@ -1,6 +1,6 @@
 import { Dialog, styled } from "@mui/material";
 
-export const BaseDropDownWrapper = styled(Dialog)(() => {
+export const BaseDropDownModalWrapper = styled(Dialog)(() => {
 	return {
 		"& .MuiDialog-paper": {
 			"& ul": {

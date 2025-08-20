@@ -20,7 +20,10 @@
 		--subtitle-grey-color: #656f7d;
 		--subtitle-dark-color: #1b1b1b;
 		--form-field-error-color: #ffe6e4;
+		--form-unchecked-border-color: #d2d5da;
 		--form-field-error-border-color: #ff3b2d;
+		--connection-hints-border-color: #ff3434;
+		--connection-hints-bg-color: #ff34341a;
 		--stepper-color: #ffab051a;
 		--side-nav-off-white-bg-color: #f6f6f6;
 		--menu-item-hover-bg-color: #f7f7f7;
@@ -37,6 +40,13 @@
 	.loader {
 		width: calc(0.5 * var(--basic-padding)) !important;
 		height: auto !important;
+	}
+
+	@keyframes rotate360 {
+		to {
+			transform: rotate(1turn);
+			transform-origin: center;
+		}
 	}
 
 	* {
@@ -164,6 +174,67 @@
 		max-height: 400px;
 		border-radius: 12px;
 		margin: 0 var(--basic-margin) 0;
+	}
+
+	/* below are styles pertaining to the alert modals */
+	.alert-modal .alert-modal-item {
+		display: flex;
+		justify-content: center;
+		padding: 0 var(--basic-padding);
+	}
+
+	.alert-modal .alert-modal-icon {
+		padding: var(--basic-padding);
+	}
+
+	.alert-modal .alert-modal-spinning-icon > img {
+		width: 48px;
+		height: 48px;
+		object-fit: contain;
+		display: inline-block;
+		animation: rotate360 1.5s linear infinite;
+	}
+
+	.alert-modal .alert-modal-confetti-icon > img {
+		width: 100%;
+		height: auto;
+	}
+
+	.alert-modal .alert-modal-body {
+		gap: calc(var(--flex-gap) / 2);
+		padding: 0 var(--basic-padding) var(--basic-padding);
+	}
+
+	.alert-modal .alert-modal-body > .connection-hints {
+		background-color: var(--connection-hints-bg-color);
+		border-left: 5px solid var(--connection-hints-border-color);
+		padding: calc(var(--basic-padding) / 2) var(--basic-padding);
+	}
+
+	.alert-modal .alert-modal-body > .connection-hints ul {
+		display: flex;
+		flex-direction: column;
+		gap: calc(var(--flex-gap) / 2);
+		list-style-position: inside;
+		padding-inline: 0;
+	}
+
+	.alert-modal .alert-modal-body > .connection-hints ul > li {
+		font-family: "Space Grotesk";
+		font-weight: 500;
+		font-size: 14px;
+		line-height: normal;
+		color: var(--form-header-color);
+		overflow: hidden;
+		white-space: wrap;
+		text-overflow: ellipsis;
+	}
+
+	.alert-modal .alert-modal-body > .complaint-handling {
+		border-radius: 10px;
+		gap: calc(var(--flex-gap) / 2);
+		padding: calc(var(--basic-padding) / 2);
+		background-color: var(--stepper-color);
 	}
 }
 

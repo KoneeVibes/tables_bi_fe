@@ -12,7 +12,7 @@ import { TopNavigationWrapper } from "./styled";
 import { AppContext } from "../../../context/appContext";
 import MenuIcon from "@mui/icons-material/Menu";
 import clipboardIcon from "../../../asset/icon/copy-to-clipboard-icon.svg";
-import { BaseDropDown } from "../../../component/modal/dropdown";
+import { BaseDropDownModal } from "../../../component/modal/dropdown";
 import { BaseDropDownType } from "../../../type/component.type";
 import { BaseButton } from "../../../component/button/styled";
 import {
@@ -239,7 +239,7 @@ export const TopNavigation: React.FC<TopNavigationPropsType> = ({
 								</Box>
 							</Stack>
 						</Stack>
-						<BaseDropDown
+						<BaseDropDownModal
 							items={userMenuItems}
 							open={isUserMenuOpen}
 							header={userMenuHeader}

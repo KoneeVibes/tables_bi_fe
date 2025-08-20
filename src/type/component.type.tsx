@@ -27,11 +27,15 @@ export type BaseDropDownType = {
 	url?: string;
 };
 
-export type BaseDropDownPropsType = {
+export type ModalPropsType = {
 	open: boolean;
 	handleClose:
 		| ((event: {}, reason: "backdropClick" | "escapeKeyDown") => void)
 		| undefined;
+	className?: string;
+};
+
+export type BaseDropDownModalPropsType = {
 	items: BaseDropDownType[];
 	handleItemClick: (
 		e: React.MouseEvent<HTMLLIElement, MouseEvent>,
@@ -39,5 +43,10 @@ export type BaseDropDownPropsType = {
 	) => void;
 	header?: React.ReactNode;
 	footer?: React.ReactNode;
-	className?: string;
-};
+} & ModalPropsType;
+
+export type BaseAlertModalPropsType = {
+	icon?: React.ReactNode;
+	body?: React.ReactNode;
+	header?: React.ReactNode;
+} & ModalPropsType;

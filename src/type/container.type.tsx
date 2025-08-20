@@ -8,7 +8,7 @@ export type AppLayoutPropsType = {
 	children: React.ReactNode;
 };
 
-export type SignUpFormPropsType = {
+export type BaseFormPropsType = {
 	error?: string | null;
 	setError?: React.Dispatch<React.SetStateAction<string | null>>;
 	formDetails: Record<string, any>;
