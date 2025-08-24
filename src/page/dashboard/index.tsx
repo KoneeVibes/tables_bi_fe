@@ -101,11 +101,11 @@ export const Dashboard = () => {
 			},
 			{
 				header: "Verifying credentials...",
-				body: "Checking your database credentials to ensure everything is correct.",
+				body: "Fetching your data from the server. Hang tight while we load the necessary information.",
 			},
 			{
 				header: "Retrieving data...",
-				body: "Almost there... fetching database information.",
+				body: "Checking your credentials and ensuring a secure connection. Please be patient.",
 			},
 		];
 		let index = 0;
