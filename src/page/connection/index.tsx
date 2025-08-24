@@ -28,7 +28,6 @@ export const Connection = () => {
 			const response = await retrieveAllTableService(TOKEN, dataSource.name);
 			if (response.status === "success") {
                 setNames(response.data);
-                console.log(response.data);
 			} else {
 				console.log("Please check your credentials and try again.");
 			}
