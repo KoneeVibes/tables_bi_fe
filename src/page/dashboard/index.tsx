@@ -45,7 +45,7 @@ export const Dashboard = () => {
 	const [connectionDetails, setConnectionDetails] = useState<
 		Record<string, any>
 	>({
-		hostURL: "",
+		host: "",
 		port: "",
 		username: "",
 		password: "",
@@ -83,19 +83,47 @@ export const Dashboard = () => {
 		e: React.FormEvent<HTMLFormElement>
 	) => {
 		e.preventDefault();
+		if (!dataSource.name) {
+			return setError("Please select a datasource to proceed.");
+		}
 		setError(null);
 		setIsLoading(true);
 		setIsAlertModalOpen(true);
+		setIsConnectionSuccessful(false);
+		setAlertModalTexts({
+			header: "Establishing connection..",
+			body: "Please wait while we connect to the database. This might take a few seconds",
+		});
+		const messages = [
+			{
+				header: "Establishing connection..",
+				body: "Please wait while we connect to the database. This might take a few seconds",
+			},
+			{
+				header: "Verifying credentials...",
+				body: "Checking your database credentials to ensure everything is correct.",
+			},
+			{
+				header: "Retrieving data...",
+				body: "Almost there... fetching database information.",
+			},
+		];
+		let index = 0;
+		const interval = setInterval(() => {
+			index++;
+			if (index < messages.length) {
+				setAlertModalTexts(messages[index]);
+			}
+		}, 2000);
 		try {
 			const response = await connectToDB(
 				TOKEN,
 				connectionDetails,
 				dataSource.name
 			);
+			clearInterval(interval);
 			if (response.status === "success") {
 				setIsLoading(false);
-				// we will have various api calls here that will update alert modal
-				// texts with respective messages before updating connection successful state
 				setAlertModalTexts({
 					header: "Connection Successful!",
 					body: "Your database connection has been established successfully.",
@@ -112,6 +140,7 @@ export const Dashboard = () => {
 				);
 			}
 		} catch (error: any) {
+			clearInterval(interval);
 			setIsLoading(false);
 			setAlertModalTexts({
 				header: "Connection Failed",

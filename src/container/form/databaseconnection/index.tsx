@@ -44,8 +44,8 @@ export const DatabaseConnectionForm: React.FC<BaseFormPropsType> = ({
 						<BaseLabel>Host URL</BaseLabel>
 						<BaseInput
 							required
-							name="hostURL"
-							value={formDetails.hostURL}
+							name="host"
+							value={formDetails.host}
 							placeholder="Enter Host URL"
 							onChange={(e) => handleChange(e)}
 						/>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { AppLayoutWrapper } from "./styled";
 import avatar from "../../../asset/image/avatar.png";
 import { SideNavigation } from "../../navigation/sidenavigation";
@@ -8,6 +8,7 @@ import { MainArea } from "../../mainarea";
 import { signOutUser } from "../../../util/authentication/signOut";
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
+import { retrieveLoggedInUserService } from "../../../util/usermanagement/retrieveLoggedInUser";
 
 export const AppLayout: React.FC<AppLayoutPropsType> = ({
 	pageId,
@@ -18,6 +19,10 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 	const TOKEN = cookies.getAll().TOKEN;
 
 	const navigate = useNavigate();
+	const [authenticatedUser, setAuthenticatedUser] = useState<Record<
+		string,
+		any
+	> | null>(null);
 
 	useEffect(() => {
 		if (!pageId) return;
@@ -26,6 +31,19 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 			document.body.removeAttribute("id");
 		};
 	}, [pageId]);
+
+	useEffect(() => {
+		if (!TOKEN) return;
+		const fetchLoggedInUser = async () => {
+			try {
+				const response = await retrieveLoggedInUserService(TOKEN);
+				return setAuthenticatedUser(response);
+			} catch (error) {
+				console.error("Failed to fetch authenticated user:", error);
+			}
+		};
+		fetchLoggedInUser();
+	}, [TOKEN]);
 
 	const handleLogoutUser = async (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -48,14 +66,14 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 	return (
 		<AppLayoutWrapper id={pageId} maxWidth={false}>
 			<SideNavigation
-				username="Barbara Ani"
-				email="neilsonmike14@gmail.com"
+				username={`${authenticatedUser?.first_name} ${authenticatedUser?.last_name}`}
+				email={`${authenticatedUser?.email}`}
 				avatar={avatar}
 				logoutUser={handleLogoutUser}
 			/>
 			<TopNavigation
-				username="Barbara Ani"
-				email="neilsonmike14@gmail.com"
+				username={`${authenticatedUser?.first_name} ${authenticatedUser?.last_name}`}
+				email={`${authenticatedUser?.email}`}
 				avatar={avatar}
 				pageTitle={pageTitle}
 				logoutUser={handleLogoutUser}
