@@ -17,7 +17,9 @@ export type BaseLabelPropsType = BaseTypographyType & FormLabelProps;
 
 export type BaseInputPropsType = BaseTypographyType & {
 	border?: string;
+	radius?: string;
 	bgcolor?: string;
+	padding?: string;
 } & InputBaseProps;
 
 export type BaseDropDownType = {
@@ -50,3 +52,15 @@ export type BaseAlertModalPropsType = {
 	body?: React.ReactNode;
 	header?: React.ReactNode;
 } & ModalPropsType;
+
+export type BaseTablePropsType = {
+	headers: string[];
+	rows: Record<any, any>[];
+	selectedRows?: any[];
+	children: React.ReactNode;
+	containsCheckbox?: boolean;
+	onSelectAllRowClick?: (
+		event: React.ChangeEvent<HTMLInputElement>,
+		checked: boolean
+	) => void;
+};

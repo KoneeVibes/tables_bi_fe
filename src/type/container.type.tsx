@@ -29,3 +29,38 @@ export type TopNavigationPropsType = {
 export type MainAreaPropsType = {
 	children: React.ReactNode;
 };
+
+export type DatasourceSwitchTablePropsType = {
+	tables: Record<string, any>[];
+} & BaseFormPropsType;
+
+export type SelectedDbTableFieldsPropsType = {
+	fields: Record<string, any>[];
+} & BaseFormPropsType;
+
+export type ConnectedTablePropsType = {
+	tableName: string;
+	fieldName: string;
+	fields: Record<string, any>[];
+	tables: Record<string, any>[];
+	setTableRelationship: React.Dispatch<
+		React.SetStateAction<Record<string, any> | null>
+	>;
+} & BaseFormPropsType;
+
+export type BaseTablePropsType = {
+	rows: Record<any, any>[];
+};
+
+export type QueryResultTablePropsType = {
+	headers: string[];
+	selectedRows: any[];
+	handleCheckRow: (
+		event: React.ChangeEvent<HTMLInputElement>,
+		index: number
+	) => void;
+	handleCheckAllRow: (
+		event: React.ChangeEvent<HTMLInputElement>,
+		checked: boolean
+	) => void;
+} & BaseTablePropsType;

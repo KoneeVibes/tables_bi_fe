@@ -1,6 +1,6 @@
 const BASE_ENDPOINT = process.env.REACT_APP_BASE_API;
 
-export const signInUser = async (payload: any) => {
+export const signInUserService = async (payload: any) => {
     try {
         const response = await fetch(`${BASE_ENDPOINT}/api/v1/authentication/sign-in`, {
             method: 'POST',

@@ -8,6 +8,7 @@ import { Connection } from "./page/connection";
 import { SavedView } from "./page/savedview";
 import { Setting } from "./page/setting";
 import { RouteProtector } from "./config/routeProtector";
+import { QueryResult } from "./page/queryresult";
 
 function App() {
 	return (
@@ -20,6 +21,7 @@ function App() {
 					<Route path="/dashboard" element={<Dashboard />} />
 					<Route path="/connection" element={<Connection />} />
 					<Route path="/saved-view" element={<SavedView />} />
+					<Route path="/saved-view/:queryId" element={<QueryResult />} />
 					<Route path="/setting" element={<Setting />} />
 				</Route>
 			</Routes>

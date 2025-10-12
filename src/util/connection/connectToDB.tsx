@@ -1,6 +1,6 @@
 const BASE_ENDPOINT = process.env.REACT_APP_BASE_API;
 
-export const connectToDB = async (
+export const connectToDBService = async (
 	TOKEN: string,
 	payload: any,
 	datasource: string

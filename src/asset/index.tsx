@@ -9,3 +9,10 @@ export { ReactComponent as UserMenuNotificationIcon } from "../asset/icon/user-m
 export { ReactComponent as UserMenuSettingIcon } from "../asset/icon/user-menu-setting-icon.svg";
 export { ReactComponent as UserMenuHelpIcon } from "../asset/icon/user-menu-help-icon.svg";
 export { ReactComponent as UserMenuLogoutIcon } from "../asset/icon/user-menu-logout-icon.svg";
+export { ReactComponent as SearchIconLightColorVariant } from "../asset/icon/search-icon-light-color-variant.svg";
+export { ReactComponent as SearchIconPrimaryColorVariant } from "../asset/icon/search-icon-primary-color-variant.svg";
+export { ReactComponent as ResetIcon } from "../asset/icon/reset-icon.svg";
+export { ReactComponent as VerticalEllipsisIcon } from "../asset/icon/vertical-ellipsis-icon.svg";
+export { ReactComponent as VisibleIcon } from "../asset/icon/visible-icon.svg";
+export { ReactComponent as DatabaseIcon } from "../asset/icon/db-icon.svg";
+export { ReactComponent as DeleteIcon } from "../asset/icon/delete-icon.svg";

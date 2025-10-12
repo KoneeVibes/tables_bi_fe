@@ -5,7 +5,7 @@ import { SideNavigation } from "../../navigation/sidenavigation";
 import { AppLayoutPropsType } from "../../../type/container.type";
 import { TopNavigation } from "../../navigation/topnavigation";
 import { MainArea } from "../../mainarea";
-import { signOutUser } from "../../../util/authentication/signOut";
+import { signOutUserService } from "../../../util/authentication/signOut";
 import Cookies from "universal-cookie";
 import { useNavigate } from "react-router-dom";
 import { retrieveLoggedInUserService } from "../../../util/usermanagement/retrieveLoggedInUser";
@@ -50,7 +50,7 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 	) => {
 		e.preventDefault();
 		try {
-			const response = await signOutUser(TOKEN);
+			const response = await signOutUserService(TOKEN);
 			if (response.status === "success") {
 				cookies.remove("TOKEN", { path: "/" });
 			} else {

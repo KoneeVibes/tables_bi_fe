@@ -1,4 +1,6 @@
 import {
+	DatabaseIcon,
+	DeleteIcon,
 	SideNavigationConnectionIcon,
 	SideNavigationDashboardIcon,
 	SideNavigationSavedViewIcon,
@@ -7,10 +9,11 @@ import {
 	UserMenuNotificationIcon,
 	UserMenuProfileIcon,
 	UserMenuSettingIcon,
+	VisibleIcon,
 } from "../asset";
 import encryptionIcon from "../asset/icon/encryption-icon.svg";
 import timeIcon from "../asset/icon/time-icon.svg";
-import dbIcon from "../asset/icon/db-icon.svg";
+import dbIcon from "../asset/icon/red-db-icon.svg";
 import helpIcon from "../asset/icon/help-icon.svg";
 import mySQLIcon from "../asset/icon/my-sql-icon.svg";
 import postgreSQLIcon from "../asset/icon/postgres-sql-icon.svg";
@@ -79,4 +82,25 @@ export const supportedDataSources = [
 	{ icon: postgreSQLIcon, name: "PostgreSQL" },
 	{ icon: sqlServerIcon, name: "SQL-Server" },
 	{ icon: otherDBIcon, name: "Others" },
+];
+
+export const queryMenuItems = [
+	{
+		id: 0,
+		title: "View Table",
+		icon: <VisibleIcon />,
+		url: "/saved-view",
+	},
+	{
+		id: 1,
+		title: "Export",
+		icon: <DatabaseIcon />,
+		url: "/export",
+	},
+	{
+		id: 2,
+		title: "Delete",
+		icon: <DeleteIcon />,
+		url: "/delete",
+	},
 ];

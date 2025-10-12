@@ -8,7 +8,7 @@ import { BaseLabel } from "../../component/form/label/styled";
 import { BaseInput } from "../../component/form/input/styled";
 import { BaseButton } from "../../component/button/styled";
 import { DatabaseConnectionForm } from "../../container/form/databaseconnection";
-import { connectToDB } from "../../util/connection/connectToDB";
+import { connectToDBService } from "../../util/connection/connectToDB";
 import Cookies from "universal-cookie";
 import { BaseAlertModal } from "../../component/modal/alert";
 import spinner from "../../asset/icon/spinner-icon.svg";
@@ -116,7 +116,7 @@ export const Dashboard = () => {
 			}
 		}, 2000);
 		try {
-			const response = await connectToDB(
+			const response = await connectToDBService(
 				TOKEN,
 				connectionDetails,
 				dataSource.name
@@ -466,21 +466,21 @@ export const Dashboard = () => {
 							disabled={isLoading}
 							sx={{ width: { mobile: "100%", tablet: "auto" } }}
 						>
-							{isLoading ? (
+							{isLoading && (
 								<CircularProgress color="inherit" className="loader" />
-							) : (
-								<Typography
-									variant={"button"}
-									fontFamily={"inherit"}
-									fontWeight={"inherit"}
-									fontSize={"inherit"}
-									lineHeight={"inherit"}
-									color={"inherit"}
-									textTransform={"inherit"}
-								>
-									Test Connection
-								</Typography>
 							)}
+							<Typography
+								variant={"button"}
+								fontFamily={"inherit"}
+								fontWeight={"inherit"}
+								fontSize={"inherit"}
+								lineHeight={"inherit"}
+								color={"inherit"}
+								textTransform={"inherit"}
+								visibility={isLoading ? "hidden" : "visible"}
+							>
+								Test Connection
+							</Typography>
 						</BaseButton>
 					</Box>
 				</form>

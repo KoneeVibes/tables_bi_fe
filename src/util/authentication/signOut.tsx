@@ -1,6 +1,6 @@
 const BASE_ENDPOINT = process.env.REACT_APP_BASE_API;
 
-export const signOutUser = async (token: string) => {
+export const signOutUserService = async (token: string) => {
 	try {
 		const response = await fetch(
 			`${BASE_ENDPOINT}/api/v1/authentication/sign-out`,
