@@ -30,6 +30,8 @@ export const SavedViewWrapper = styled(Stack)(({ theme }) => {
 			maxWidth: "43.75rem",
 			width: "-webkit-fill-available",
 			gap: "calc(var(--flex-gap))",
+			position: "relative",
+			paddingBottom: "calc(var(--basic-padding) * 2)",
 			"& .grouped-results": {
 				gap: "calc(var(--flex-gap)/2)",
 				"& .query-result": {
@@ -39,7 +41,6 @@ export const SavedViewWrapper = styled(Stack)(({ theme }) => {
 					gap: "calc(var(--flex-gap))",
 					border: "1px solid var(--form-label-border-color)",
 					flexDirection: "row",
-					alignItems: "center",
 					justifyContent: "space-between",
 					overflow: "hidden",
 					"& .result-title": {
@@ -50,6 +51,38 @@ export const SavedViewWrapper = styled(Stack)(({ theme }) => {
 						"& .result-meta-data": {
 							flexDirection: "row",
 							gap: "calc(var(--flex-gap)/2)",
+						},
+					},
+					"& .dropdown-modal": {
+						position: "absolute",
+						right: "calc(var(--basic-padding) * 2)",
+						backgroundColor: "var(--light-color)",
+						boxShadow: "0px 0px 10px 0px #0000001A",
+						zIndex: 1,
+						borderRadius: "10px",
+						paddingTop: 0,
+						paddingBottom: 0,
+						overflow: "hidden",
+						"& .MuiListItem-root": {
+							padding: 0,
+							"& .MuiListItemButton-root": {
+								padding:
+									"calc(var(--basic-padding)/4) calc(var(--basic-padding)*0.375)",
+								gap: "calc(var(--flex-gap)/4)",
+								"& .MuiListItemText-root": {
+									margin: 0,
+									"& .MuiTypography-root": {
+										fontFamily: "Inter",
+										fontSize: "14px",
+									},
+								},
+								"& .MuiListItemIcon-root": {
+									minWidth: 0,
+								},
+							},
+							"&:hover": {
+								backgroundColor: "var(--diluted-primary-color)",
+							},
 						},
 					},
 				},

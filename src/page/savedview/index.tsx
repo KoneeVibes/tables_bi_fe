@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppLayout } from "../../container/layout/app";
 import { SavedViewWrapper } from "./styled";
@@ -7,6 +7,11 @@ import Cookies from "universal-cookie";
 import {
 	Box,
 	IconButton,
+	List,
+	ListItem,
+	ListItemButton,
+	ListItemIcon,
+	ListItemText,
 	Stack,
 	Typography,
 	useMediaQuery,
@@ -15,9 +20,7 @@ import { useNavigate } from "react-router-dom";
 import savedQueryIcon from "../../asset/icon/saved-query-icon.svg";
 import { VerticalEllipsisIcon } from "../../asset";
 import { BaseButton } from "../../component/button/styled";
-import { BaseDropDownModal } from "../../component/modal/dropdown";
 import { queryMenuItems } from "../../config/static";
-import { BaseDropDownType } from "../../type/component.type";
 
 export const SavedView = () => {
 	const cookies = new Cookies();
@@ -25,6 +28,7 @@ export const SavedView = () => {
 
 	const navigate = useNavigate();
 	const matches = useMediaQuery("(min-width:280px)");
+	const dropdownRef = useRef<HTMLUListElement | null>(null);
 
 	const [activeTabIndex, setActiveTabIndex] = useState(0);
 	const [isQueryMenuOpen, setIsQueryMenuOpen] = useState(false);
@@ -85,6 +89,42 @@ export const SavedView = () => {
 		setSelectedQueryIndex(null);
 		return setIsQueryMenuOpen(false);
 	};
+
+	const handleMenuItemClick = (
+		e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+		item: Record<string, any>,
+		index: number
+	) => {
+		e.preventDefault();
+		switch (item.id) {
+			case 0:
+				navigate(`${item.url}/${index}` as string);
+				break;
+			default:
+				handleCloseQueryMenu();
+				break;
+		}
+	};
+
+	const handleDropDownClickOutside = (event: MouseEvent) => {
+		if (
+			dropdownRef.current &&
+			!dropdownRef.current.contains(event.target as Node)
+		)
+			return setSelectedQueryIndex(null);
+	};
+
+	useEffect(() => {
+		// ensure that the empty string value of initial state is matched
+		if (selectedQueryIndex !== null) {
+			document.addEventListener("mousedown", handleDropDownClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleDropDownClickOutside);
+		}
+		return () => {
+			document.removeEventListener("mousedown", handleDropDownClickOutside);
+		};
+	}, [selectedQueryIndex]);
 
 	return (
 		<AppLayout pageId="Saved-View" pageTitle="Saved View">
@@ -259,37 +299,38 @@ export const SavedView = () => {
 																	border: "1px solid var(--border-color)",
 																}}
 																onClick={(e) =>
-																	handleOpenQueryMenu(e, queryIndex)
+																	handleOpenQueryMenu(e, query?.originalIndex)
 																}
 															>
 																<VerticalEllipsisIcon />
 															</IconButton>
 														</Box>
-														<BaseDropDownModal
-															items={queryMenuItems}
-															open={
-																isQueryMenuOpen &&
-																selectedQueryIndex === queryIndex
-															}
-															handleClose={handleCloseQueryMenu}
-															handleItemClick={(
-																e: React.MouseEvent<HTMLLIElement, MouseEvent>,
-																item: BaseDropDownType
-															) => {
-																e.preventDefault();
-																switch (item.id) {
-																	case 0:
-																		navigate(
-																			`${item.url}/${queryIndex}` as string
-																		);
-																		break;
-																	default:
-																		handleCloseQueryMenu();
-																		break;
-																}
-															}}
-															className="query-item-menu-dropdown"
-														/>
+														{isQueryMenuOpen &&
+															selectedQueryIndex === query?.originalIndex && (
+																<List
+																	component={"ul"}
+																	ref={dropdownRef}
+																	className="dropdown-modal"
+																>
+																	{queryMenuItems.map((item, index) => (
+																		<ListItem
+																			key={index}
+																			onClick={(e) =>
+																				handleMenuItemClick(
+																					e,
+																					item,
+																					query?.originalIndex
+																				)
+																			}
+																		>
+																			<ListItemButton>
+																				<ListItemIcon>{item.icon}</ListItemIcon>
+																				<ListItemText primary={item.title} />
+																			</ListItemButton>
+																		</ListItem>
+																	))}
+																</List>
+															)}
 													</Stack>
 												);
 											}

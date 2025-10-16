@@ -251,21 +251,6 @@
 		max-height: 250px;
 		border-radius: 10px;
 	}
-
-	/* below are styles pertaining to the query menu modals */
-	.query-item-menu-dropdown .MuiDialog-container {
-		/* right: 0;
-		height: auto;
-		position: absolute;
-		top: var(--side-navigation-header-height); */
-	}
-
-	.query-item-menu-dropdown .MuiDialog-paper {
-		/* width: 250px;
-		max-height: 400px;
-		border-radius: 12px;
-		margin: 0 var(--basic-margin) 0; */
-	}
 }
 
 @media screen and (min-width: 425px) {
