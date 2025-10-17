@@ -28,19 +28,24 @@ import { AppContext } from "../../context/appContext";
 import { QueryResultTable } from "../../container/table/queryresulttable";
 import { saveQueryService } from "../../util/query/saveQuery";
 import { SaveQueryForm } from "../../container/form/savequery";
+import { BaseAlertModal } from "../../component/modal/alert";
+import confetti from "../../asset/image/success-confetti.png";
+import { useNavigate } from "react-router-dom";
 
 export const Connection = () => {
 	const cookies = new Cookies();
 	const TOKEN = cookies.getAll().TOKEN;
 
+	const navigate = useNavigate();
 	const matches = useMediaQuery("(min-width:250px)");
 	const { joinTableCount, setJoinTableCount } = useContext(AppContext);
 
 	const [isJoining, setIsJoining] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [joiningError, setJoiningError] = useState<string | null>(null);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [saveQueryError, setSaveQueryError] = useState<string | null>(null);
+	const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [queryResult, setQueryResult] = useState<Record<string, any>[] | null>(
 		null
 	);
@@ -402,6 +407,19 @@ export const Connection = () => {
 		return setIsSaveQueryFormModalOpen(true);
 	};
 
+	const handleAlertModalPersist = () => {
+		if (isSaving) return;
+		setIsAlertModalOpen(false);
+	};
+
+	const handleNavigateToConnection = (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.preventDefault();
+		handleAlertModalPersist();
+		return navigate("/saved-view");
+	};
+
 	const handleSaveQuery = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setIsSaving(true);
@@ -431,7 +449,9 @@ export const Connection = () => {
 			};
 			const response = await saveQueryService(TOKEN, dataSource.name, payload);
 			if (response.status === "success") {
+				setQueryName("");
 				setIsSaving(false);
+				setIsAlertModalOpen(true);
 				setIsSaveQueryFormModalOpen(false);
 			} else {
 				setIsSaving(false);
@@ -444,9 +464,82 @@ export const Connection = () => {
 		}
 	};
 
+	const alertIcon = (
+		<Box
+			component={"div"}
+			className={`alert-modal-item alert-modal-icon alert-modal-confetti-icon`}
+		>
+			<img src={confetti} alt={"Success Confetti"} />
+		</Box>
+	);
+
+	const alertHeader = (
+		<Box component={"div"} className="alert-modal-item alert-modal-header">
+			<Typography
+				variant="h3"
+				fontFamily={"Inter"}
+				fontWeight={600}
+				fontSize={"20px"}
+				lineHeight={"normal"}
+				color="var(--form-header-color)"
+				textAlign={"center"}
+				whiteSpace={"normal"}
+			>
+				Query Added Successfully
+			</Typography>
+		</Box>
+	);
+
+	const alertBody = (
+		<Stack className="alert-modal-item alert-modal-body">
+			<Box>
+				<Typography
+					variant="body1"
+					fontFamily={"Inter"}
+					fontWeight={500}
+					fontSize={"14px"}
+					lineHeight={"normal"}
+					color="var(--form-header-color)"
+					textAlign={"center"}
+					whiteSpace={"normal"}
+				>
+					Your query has been added successfully.
+				</Typography>
+			</Box>
+			<Box overflow={"hidden"}>
+				<BaseButton
+					disableElevation
+					variant="contained"
+					sx={{ width: "100%" }}
+					onClick={handleNavigateToConnection}
+				>
+					<Typography
+						variant={"button"}
+						fontFamily={"inherit"}
+						fontWeight={"inherit"}
+						fontSize={"inherit"}
+						lineHeight={"inherit"}
+						color={"inherit"}
+						textTransform={"inherit"}
+					>
+						Continue to Connection
+					</Typography>
+				</BaseButton>
+			</Box>
+		</Stack>
+	);
+
 	return (
 		<AppLayout pageId="Connection" pageTitle="Connections">
 			<ConnectionWrapper>
+				<BaseAlertModal
+					open={isAlertModalOpen}
+					icon={alertIcon}
+					header={alertHeader}
+					body={alertBody}
+					className="alert-modal"
+					handleClose={handleAlertModalPersist}
+				/>
 				<SaveQueryForm
 					isLoading={isSaving}
 					queryName={queryName}
