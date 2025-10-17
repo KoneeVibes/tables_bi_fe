@@ -522,7 +522,7 @@ export const Connection = () => {
 						color={"inherit"}
 						textTransform={"inherit"}
 					>
-						Continue to Connection
+						Continue to Saved View
 					</Typography>
 				</BaseButton>
 			</Box>
