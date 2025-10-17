@@ -53,6 +53,17 @@ export type BaseAlertModalPropsType = {
 	header?: React.ReactNode;
 } & ModalPropsType;
 
+export type FormModalPropsType = {
+	open: boolean;
+	handleClickOutside:
+		| ((event: {}, reason: "backdropClick" | "escapeKeyDown") => void)
+		| undefined;
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+	title?: string;
+	children: React.ReactNode;
+	className?: string;
+};
+
 export type BaseTablePropsType = {
 	headers: string[];
 	rows: Record<any, any>[];

@@ -251,6 +251,20 @@
 		max-height: 250px;
 		border-radius: 10px;
 	}
+
+	/* below are styles pertaining to form modal components */
+	.save-query-form-modal .MuiDialog-paper {
+		max-width: 25rem;
+		border-radius: 10px;
+		width: -webkit-fill-available;
+	}
+
+	/* below are styles pertaining to the save-query form modal */
+	.save-query-form-modal .save-query-hint {
+		border-left: 5px solid var(--primary-color);
+		background-color: var(--diluted-primary-color);
+		padding: calc(var(--basic-padding) / 2);
+	}
 }
 
 @media screen and (min-width: 425px) {

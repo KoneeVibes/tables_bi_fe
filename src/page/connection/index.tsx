@@ -27,6 +27,7 @@ import { retrieveAllTableRelationshipService } from "../../util/query/retrieveAl
 import { AppContext } from "../../context/appContext";
 import { QueryResultTable } from "../../container/table/queryresulttable";
 import { saveQueryService } from "../../util/query/saveQuery";
+import { SaveQueryForm } from "../../container/form/savequery";
 
 export const Connection = () => {
 	const cookies = new Cookies();
@@ -44,6 +45,9 @@ export const Connection = () => {
 		null
 	);
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
+	const [isSaveQueryFormModalOpen, setIsSaveQueryFormModalOpen] =
+		useState(false);
+	const [queryName, setQueryName] = useState<string>("");
 	const [dataSource] = useState<Record<string, any>>(
 		localStorage.getItem("dataSource")
 			? JSON.parse(localStorage.getItem("dataSource") as string)
@@ -391,14 +395,23 @@ export const Connection = () => {
 		}
 	};
 
-	const handleSaveQuery = async (
+	const handleOpenSaveQueryFormModal = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
+		e.preventDefault();
+		return setIsSaveQueryFormModalOpen(true);
+	};
+
+	const handleSaveQuery = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setIsSaving(true);
 		setSaveQueryError(null);
 		if (!dataSource.name) {
 			console.error("Please select a datasource to proceed.");
+			return;
+		}
+		if (!queryName.trim()) {
+			setSaveQueryError("Please enter a query name.");
 			return;
 		}
 		const cleanedDatasourceDetails = Object.entries(datasourceDetails).reduce(
@@ -412,12 +425,14 @@ export const Connection = () => {
 		);
 		try {
 			const payload = {
-				datasourceDetails: cleanedDatasourceDetails,
+				queryName,
 				tableRelationship,
+				datasourceDetails: cleanedDatasourceDetails,
 			};
 			const response = await saveQueryService(TOKEN, dataSource.name, payload);
 			if (response.status === "success") {
 				setIsSaving(false);
+				setIsSaveQueryFormModalOpen(false);
 			} else {
 				setIsSaving(false);
 				setSaveQueryError("Save query failed. Please try again.");
@@ -432,6 +447,15 @@ export const Connection = () => {
 	return (
 		<AppLayout pageId="Connection" pageTitle="Connections">
 			<ConnectionWrapper>
+				<SaveQueryForm
+					isLoading={isSaving}
+					queryName={queryName}
+					error={saveQueryError}
+					setQueryName={setQueryName}
+					handleSubmit={handleSaveQuery}
+					isOpen={isSaveQueryFormModalOpen}
+					setIsOpen={setIsSaveQueryFormModalOpen}
+				/>
 				<Stack className="data-source-stack">
 					<Stack
 						direction={"row"}
@@ -719,11 +743,8 @@ export const Connection = () => {
 										}}
 										startIcon={<SearchIconLightColorVariant />}
 										padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
-										onClick={handleSaveQuery}
+										onClick={handleOpenSaveQueryFormModal}
 									>
-										{isSaving && (
-											<CircularProgress color="inherit" className="loader" />
-										)}
 										<Typography
 											variant={"button"}
 											fontFamily={"inherit"}

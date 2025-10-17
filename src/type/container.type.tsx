@@ -64,3 +64,13 @@ export type QueryResultTablePropsType = {
 		checked: boolean
 	) => void;
 } & BaseTablePropsType;
+
+export type SaveQueryFormPropsType = {
+	isOpen: boolean;
+	queryName: string;
+	isLoading: boolean;
+	error: string | null;
+	setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	setQueryName: React.Dispatch<React.SetStateAction<string>>;
+	handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+};
