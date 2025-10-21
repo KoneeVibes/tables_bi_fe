@@ -35,7 +35,11 @@ export const QueryResultTable: React.FC<QueryResultTablePropsType> = ({
 								/>
 							</TableCell>
 							{headers.map((header, cellIndex) => (
-								<TableCell key={cellIndex}>{row[header]}</TableCell>
+								<TableCell key={cellIndex}>
+									{typeof row[header] === "object" && row[header] !== null
+										? JSON.stringify(row[header])
+										: row[header] ?? ""}
+								</TableCell>
 							))}
 						</TableRow>
 					);

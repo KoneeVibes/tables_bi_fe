@@ -8,11 +8,11 @@ export type AppLayoutPropsType = {
 	children: React.ReactNode;
 };
 
-export type BaseFormPropsType = {
+export type BaseFormPropsType<T = Record<string, any>> = {
 	error?: string | null;
 	setError?: React.Dispatch<React.SetStateAction<string | null>>;
-	formDetails: Record<string, any>;
-	setFormDetails: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+	formDetails: T;
+	setFormDetails: React.Dispatch<React.SetStateAction<T>>;
 };
 
 export type NavigationPropsType = {
@@ -48,6 +48,12 @@ export type ConnectedTablePropsType = {
 	>;
 } & BaseFormPropsType;
 
+export type QueryResultFilterPropsType = {
+	fields: string[];
+	handleSorting: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+	handleFiltering: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+} & BaseFormPropsType<ResultFilter>;
+
 export type BaseTablePropsType = {
 	rows: Record<any, any>[];
 };
@@ -74,3 +80,7 @@ export type SaveQueryFormPropsType = {
 	setQueryName: React.Dispatch<React.SetStateAction<string>>;
 	handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
+
+export type SortItem = { field: string; value: string };
+export type FilterItem = { field: string; criteria: string; value: string };
+export type ResultFilter = { sort: SortItem[]; filter: FilterItem[] };

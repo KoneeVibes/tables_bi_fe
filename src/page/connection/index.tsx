@@ -31,6 +31,7 @@ import { SaveQueryForm } from "../../container/form/savequery";
 import { BaseAlertModal } from "../../component/modal/alert";
 import confetti from "../../asset/image/success-confetti.png";
 import { useNavigate } from "react-router-dom";
+import { ResultFilter } from "../../type/container.type";
 
 export const Connection = () => {
 	const cookies = new Cookies();
@@ -45,7 +46,6 @@ export const Connection = () => {
 	const [joiningError, setJoiningError] = useState<string | null>(null);
 	const [saveQueryError, setSaveQueryError] = useState<string | null>(null);
 	const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [queryResult, setQueryResult] = useState<Record<string, any>[] | null>(
 		null
 	);
@@ -58,10 +58,10 @@ export const Connection = () => {
 			? JSON.parse(localStorage.getItem("dataSource") as string)
 			: { name: "" }
 	);
-	const [resultFilter, setResultFilter] = useState<Record<string, any>>({
-		group: "status",
-		sort: "ascending",
-		filter: "all",
+	const [resultFilterFields, setResultFilterFields] = useState<string[]>([]);
+	const [resultFilter, setResultFilter] = useState<ResultFilter>({
+		sort: [{ field: "", value: "" }],
+		filter: [{ field: "", criteria: "", value: "" }],
 	});
 	const [dbTables, setDbTables] = useState<Record<string, any>[]>([]);
 	const [tableRelationship, setTableRelationship] = useState<Record<
@@ -315,10 +315,98 @@ export const Connection = () => {
 		}
 	};
 
-	const handleResetResultFilter = (
+	const handleResetResultFilter = async (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
 		e.preventDefault();
+		setResultFilter({
+			sort: [{ field: "", value: "" }],
+			filter: [{ field: "", criteria: "", value: "" }],
+		});
+		await handleJoinTable(e);
+		return;
+	};
+
+	const isNumeric = (value: any): boolean => {
+		if (value === null || value === undefined) return false;
+		return !isNaN(parseFloat(value)) && isFinite(value);
+	};
+
+	const handleSorting = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		// refetch join
+		const latestData = await handleJoinTable(e);
+		if (!latestData) return;
+		let sorted = [...latestData];
+		resultFilter.sort.forEach(async ({ field, value }) => {
+			if (!field.trim() || !value.trim()) {
+				return;
+			}
+			sorted.sort((a, b) => {
+				const aVal = a[field];
+				const bVal = b[field];
+				if (aVal == null) return 1;
+				if (bVal == null) return -1;
+				const aIsNum = isNumeric(aVal);
+				const bIsNum = isNumeric(bVal);
+				if (aIsNum && bIsNum) {
+					return value.toLowerCase() === "ascending"
+						? parseFloat(aVal) - parseFloat(bVal)
+						: parseFloat(bVal) - parseFloat(aVal);
+				}
+				return value.toLowerCase() === "ascending"
+					? String(aVal).localeCompare(String(bVal))
+					: String(bVal).localeCompare(String(aVal));
+			});
+		});
+		setQueryResult(sorted);
+	};
+
+	const handleFiltering = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		// refetch join
+		const latestData = await handleJoinTable(e);
+		if (!latestData) return;
+		let filtered = [...latestData];
+		resultFilter.filter.forEach(async ({ field, criteria, value }) => {
+			if (!field.trim() || !criteria.trim() || !String(value).trim()) {
+				return;
+			}
+			filtered = filtered.filter((row) => {
+				const fieldValue = row[field];
+				if (fieldValue == null) return false;
+				const fieldIsNumeric = isNumeric(fieldValue);
+				const valueIsNumeric = isNumeric(value);
+				const left = fieldIsNumeric
+					? parseFloat(fieldValue)
+					: String(fieldValue).toLowerCase();
+				const right = valueIsNumeric
+					? parseFloat(value)
+					: String(value).toLowerCase();
+				switch (criteria.toLowerCase()) {
+					case "equals":
+						return left === right;
+					case "not equals":
+						return left !== right;
+					case "greater than":
+						if (!fieldIsNumeric || !valueIsNumeric) return false;
+						return left > right;
+					case "less than":
+						if (!fieldIsNumeric || !valueIsNumeric) return false;
+						return left < right;
+					case "contains":
+						if (fieldIsNumeric) return false;
+						return String(fieldValue)
+							.toLowerCase()
+							.includes(String(value).toLowerCase());
+					default:
+						return true;
+				}
+			});
+		});
+		setQueryResult(filtered);
 	};
 
 	const handleAddTable = async (
@@ -387,6 +475,11 @@ export const Connection = () => {
 			if (response.status === "success") {
 				setIsJoining(false);
 				setQueryResult(response.data);
+				const fields: string[] = (response.data ?? []).flatMap(
+					(result: Record<string, any>) => Object.keys(result ?? {})
+				);
+				setResultFilterFields(Array.from(new Set(fields)));
+				return response.data;
 			} else {
 				setIsJoining(false);
 				setJoiningError(
@@ -444,6 +537,7 @@ export const Connection = () => {
 		try {
 			const payload = {
 				queryName,
+				resultFilter,
 				tableRelationship,
 				datasourceDetails: cleanedDatasourceDetails,
 			};
@@ -816,7 +910,10 @@ export const Connection = () => {
 								<form className="query-result-filter-form">
 									<QueryResultFilterForm
 										formDetails={resultFilter}
+										fields={resultFilterFields}
 										setFormDetails={setResultFilter}
+										handleSorting={handleSorting}
+										handleFiltering={handleFiltering}
 									/>
 								</form>
 								<Box overflow={"hidden"} height={"-webkit-fill-available"}>
