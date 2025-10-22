@@ -9,5 +9,10 @@ export const QueryResultWrapper = styled(Stack)(({ theme }) => {
 		"& .query-result-filter-form": {
 			flex: 1,
 		},
+		"& .centered-thumbnail": {
+			display: "block",
+			marginLeft: "auto",
+			marginRight: "auto",
+		},
 	};
 });

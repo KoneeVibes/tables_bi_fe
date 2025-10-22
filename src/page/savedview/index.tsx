@@ -274,6 +274,7 @@ export const SavedView = () => {
 					<BaseButton
 						disableElevation
 						variant="contained"
+						disabled={isDeleting}
 						sx={{ width: "100%" }}
 						bgcolor="var(--form-field-error-border-color)"
 						onClick={(e) => deleteSavedQuery(e, selectedQuery?.id as string)}
@@ -289,6 +290,7 @@ export const SavedView = () => {
 							lineHeight={"inherit"}
 							color={"inherit"}
 							textTransform={"inherit"}
+							visibility={isDeleting ? "hidden" : "visible"}
 						>
 							Yes, Delete
 						</Typography>
