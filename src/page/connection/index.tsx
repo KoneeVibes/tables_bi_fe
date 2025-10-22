@@ -26,7 +26,7 @@ import { retrieveTableRelationshipService } from "../../util/query/retrieveTable
 import { retrieveAllTableRelationshipService } from "../../util/query/retrieveAllTableRelationship";
 import { AppContext } from "../../context/appContext";
 import { QueryResultTable } from "../../container/table/queryresulttable";
-import { saveQueryService } from "../../util/query/saveQuery";
+import { saveQueryService } from "../../util/savedview/saveQuery";
 import { SaveQueryForm } from "../../container/form/savequery";
 import { BaseAlertModal } from "../../component/modal/alert";
 import confetti from "../../asset/image/success-confetti.png";

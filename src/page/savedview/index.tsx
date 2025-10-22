@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { HashLink } from "react-router-hash-link";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "../../container/layout/app";
 import { SavedViewWrapper } from "./styled";
 import { retrieveAllSavedQueryService } from "../../util/savedview/retrieveAllSavedQuery";
 import Cookies from "universal-cookie";
 import {
 	Box,
+	CircularProgress,
 	IconButton,
 	List,
 	ListItem,
@@ -21,20 +23,27 @@ import savedQueryIcon from "../../asset/icon/saved-query-icon.svg";
 import { VerticalEllipsisIcon } from "../../asset";
 import { BaseButton } from "../../component/button/styled";
 import { queryMenuItems } from "../../config/static";
+import { deleteSavedQueryService } from "../../util/savedview/deleteSavedQuery";
+import { BaseAlertModal } from "../../component/modal/alert";
 
 export const SavedView = () => {
 	const cookies = new Cookies();
 	const TOKEN = cookies.getAll().TOKEN;
 
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const matches = useMediaQuery("(min-width:280px)");
 	const dropdownRef = useRef<HTMLUListElement | null>(null);
 
+	const [isDeleting, setIsDeleting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 	const [activeTabIndex, setActiveTabIndex] = useState(0);
 	const [isQueryMenuOpen, setIsQueryMenuOpen] = useState(false);
-	const [selectedQueryIndex, setSelectedQueryIndex] = useState<number | null>(
-		null
-	);
+	const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+	const [selectedQuery, setSelectedQuery] = useState<Record<
+		string,
+		any
+	> | null>(null);
 
 	const { data: savedQuery } = useQuery({
 		queryKey: ["savedQuery", TOKEN],
@@ -78,16 +87,50 @@ export const SavedView = () => {
 
 	const handleOpenQueryMenu = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+		id: string,
 		index: number
 	) => {
 		e.preventDefault();
-		setSelectedQueryIndex(index);
+		setSelectedQuery({ index, id });
 		return setIsQueryMenuOpen(true);
 	};
 
 	const handleCloseQueryMenu = () => {
-		setSelectedQueryIndex(null);
+		setSelectedQuery(null);
 		return setIsQueryMenuOpen(false);
+	};
+
+	const handleAlertModalPersist = () => {
+		if (isDeleting) return;
+		setSelectedQuery(null);
+		setIsConfirmationModalOpen(false);
+	};
+
+	const deleteSavedQuery = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+		queryId: string
+	) => {
+		e.preventDefault();
+		if (!queryId) return;
+		setIsDeleting(true);
+		try {
+			const response = await deleteSavedQueryService(TOKEN, queryId);
+			if (response.status === "success") {
+				setIsDeleting(false);
+				setSelectedQuery(null);
+				setIsConfirmationModalOpen(false);
+				queryClient.invalidateQueries({
+					queryKey: ["savedQuery", TOKEN],
+				});
+			} else {
+				setIsDeleting(false);
+				setError("Deletion failed. Please try again.");
+			}
+		} catch (error: any) {
+			setIsDeleting(false);
+			setError(`Deletion failed. ${error.message}`);
+			console.error("Deletion failed:", error);
+		}
 	};
 
 	const handleMenuItemClick = (
@@ -100,23 +143,35 @@ export const SavedView = () => {
 			case 0:
 				navigate(`${item.url}/${index}` as string);
 				break;
+			// case 1:
+			//     // export functionality should go in here
+			// 	break;
+			case 2:
+				setError(null);
+				setIsConfirmationModalOpen(true);
+				break;
 			default:
 				handleCloseQueryMenu();
 				break;
 		}
 	};
 
-	const handleDropDownClickOutside = (event: MouseEvent) => {
-		if (
-			dropdownRef.current &&
-			!dropdownRef.current.contains(event.target as Node)
-		)
-			return setSelectedQueryIndex(null);
-	};
+	const handleDropDownClickOutside = useCallback(
+		(event: MouseEvent) => {
+			if (
+				dropdownRef.current &&
+				!isConfirmationModalOpen &&
+				!dropdownRef.current.contains(event.target as Node)
+			) {
+				return setSelectedQuery(null);
+			}
+		},
+		[isConfirmationModalOpen]
+	);
 
 	useEffect(() => {
 		// ensure that the empty string value of initial state is matched
-		if (selectedQueryIndex !== null) {
+		if (selectedQuery !== null) {
 			document.addEventListener("mousedown", handleDropDownClickOutside);
 		} else {
 			document.removeEventListener("mousedown", handleDropDownClickOutside);
@@ -124,11 +179,135 @@ export const SavedView = () => {
 		return () => {
 			document.removeEventListener("mousedown", handleDropDownClickOutside);
 		};
-	}, [selectedQueryIndex]);
+	}, [selectedQuery, handleDropDownClickOutside]);
+
+	const alertHeader = (
+		<Box
+			component={"div"}
+			className="alert-modal-item alert-modal-header confirmation-modal-header"
+		>
+			<Typography
+				variant="h3"
+				fontFamily={"Inter"}
+				fontWeight={600}
+				fontSize={"18px"}
+				lineHeight={"normal"}
+				color="var(--form-header-color)"
+				textAlign={"left"}
+				whiteSpace={"normal"}
+			>
+				Delete Table?
+			</Typography>
+		</Box>
+	);
+
+	const alertBody = (
+		<Stack className="alert-modal-item alert-modal-body confirmation-modal-body">
+			<Stack gap={"calc(var(--flex-gap)/4)"}>
+				<Box>
+					<Typography
+						variant="h3"
+						fontFamily={"Inter"}
+						fontWeight={500}
+						fontSize={"18px"}
+						lineHeight={"normal"}
+						color="var(--form-header-color)"
+						textAlign={"center"}
+						whiteSpace={"normal"}
+					>
+						Are you sure you want to delete this table?
+					</Typography>
+				</Box>
+				<Box>
+					<Typography
+						variant="body1"
+						fontFamily={"Inter"}
+						fontWeight={500}
+						fontSize={"14px"}
+						lineHeight={"normal"}
+						color="var(--form-header-color)"
+						textAlign={"center"}
+						whiteSpace={"normal"}
+					>
+						This table will be permanently removed from your library and cannot
+						be recovered.
+					</Typography>
+				</Box>
+			</Stack>
+			{error && (
+				<Box>
+					<Typography
+						fontFamily={"Inter"}
+						fontWeight={"600"}
+						fontSize={14}
+						lineHeight={"normal"}
+						color={"var(--error-red-color)"}
+						whiteSpace={"normal"}
+						textAlign={"center"}
+					>
+						{error}
+					</Typography>
+				</Box>
+			)}
+			<Stack gap={"calc(var(--flex-gap)/2)"} direction={{ mobile: "row" }}>
+				<Box flex={1} overflow={"hidden"}>
+					<BaseButton
+						disableElevation
+						variant="outlined"
+						sx={{ width: "100%" }}
+						onClick={handleAlertModalPersist}
+					>
+						<Typography
+							variant={"button"}
+							fontFamily={"inherit"}
+							fontWeight={"inherit"}
+							fontSize={"inherit"}
+							lineHeight={"inherit"}
+							color={"inherit"}
+							textTransform={"inherit"}
+						>
+							Cancel
+						</Typography>
+					</BaseButton>
+				</Box>
+				<Box flex={1} overflow={"hidden"}>
+					<BaseButton
+						disableElevation
+						variant="contained"
+						sx={{ width: "100%" }}
+						bgcolor="var(--form-field-error-border-color)"
+						onClick={(e) => deleteSavedQuery(e, selectedQuery?.id as string)}
+					>
+						{isDeleting && (
+							<CircularProgress color="inherit" className="loader" />
+						)}
+						<Typography
+							variant={"button"}
+							fontFamily={"inherit"}
+							fontWeight={"inherit"}
+							fontSize={"inherit"}
+							lineHeight={"inherit"}
+							color={"inherit"}
+							textTransform={"inherit"}
+						>
+							Yes, Delete
+						</Typography>
+					</BaseButton>
+				</Box>
+			</Stack>
+		</Stack>
+	);
 
 	return (
 		<AppLayout pageId="Saved-View" pageTitle="Saved View">
 			<SavedViewWrapper>
+				<BaseAlertModal
+					open={isConfirmationModalOpen}
+					header={alertHeader}
+					body={alertBody}
+					className="alert-modal delete-confirmation-modal"
+					handleClose={handleAlertModalPersist}
+				/>
 				<Stack className="header">
 					<Stack className="tabs">
 						<Box
@@ -149,7 +328,7 @@ export const SavedView = () => {
 								All Tables
 							</Typography>
 						</Box>
-						<Box
+						{/* <Box
 							component={"div"}
 							className={`tab-item ${
 								activeTabIndex === 1 ? "active-tab-item" : ""
@@ -166,27 +345,33 @@ export const SavedView = () => {
 							>
 								Recently Deleted
 							</Typography>
-						</Box>
+						</Box> */}
 					</Stack>
 					<Stack className="action-items">
 						<Box overflow={"hidden"}>
-							<BaseButton
-								variant="contained"
-								disableElevation
-								sx={{ width: matches ? "auto" : "100%" }}
+							<HashLink
+								smooth
+								style={{ textDecoration: "none" }}
+								to={"/dashboard#database-information-form"}
 							>
-								<Typography
-									variant={"button"}
-									fontFamily={"inherit"}
-									fontWeight={"inherit"}
-									fontSize={"inherit"}
-									lineHeight={"inherit"}
-									color={"inherit"}
-									textTransform={"inherit"}
+								<BaseButton
+									variant="contained"
+									disableElevation
+									sx={{ width: matches ? "auto" : "100%" }}
 								>
-									Add New Connection
-								</Typography>
-							</BaseButton>
+									<Typography
+										variant={"button"}
+										fontFamily={"inherit"}
+										fontWeight={"inherit"}
+										fontSize={"inherit"}
+										lineHeight={"inherit"}
+										color={"inherit"}
+										textTransform={"inherit"}
+									>
+										Add New Connection
+									</Typography>
+								</BaseButton>
+							</HashLink>
 						</Box>
 					</Stack>
 				</Stack>
@@ -299,14 +484,18 @@ export const SavedView = () => {
 																	border: "1px solid var(--border-color)",
 																}}
 																onClick={(e) =>
-																	handleOpenQueryMenu(e, query?.originalIndex)
+																	handleOpenQueryMenu(
+																		e,
+																		query?.connectionConfig.id,
+																		query?.originalIndex
+																	)
 																}
 															>
 																<VerticalEllipsisIcon />
 															</IconButton>
 														</Box>
 														{isQueryMenuOpen &&
-															selectedQueryIndex === query?.originalIndex && (
+															selectedQuery?.index === query?.originalIndex && (
 																<List
 																	component={"ul"}
 																	ref={dropdownRef}

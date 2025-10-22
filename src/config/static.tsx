@@ -1,10 +1,10 @@
 import {
-	DatabaseIcon,
+	// DatabaseIcon,
 	DeleteIcon,
 	SideNavigationConnectionIcon,
 	SideNavigationDashboardIcon,
 	SideNavigationSavedViewIcon,
-	SideNavigationSettingIcon,
+	// SideNavigationSettingIcon,
 	UserMenuHelpIcon,
 	UserMenuNotificationIcon,
 	UserMenuProfileIcon,
@@ -36,11 +36,11 @@ export const sideNavigationItems = [
 		icon: <SideNavigationSavedViewIcon />,
 		url: "/saved-view",
 	},
-	{
-		name: "Settings",
-		icon: <SideNavigationSettingIcon />,
-		url: "/setting",
-	},
+	// {
+	// 	name: "Settings",
+	// 	icon: <SideNavigationSettingIcon />,
+	// 	url: "/setting",
+	// },
 ];
 
 export const userMenuItems = [
@@ -91,12 +91,12 @@ export const queryMenuItems = [
 		icon: <VisibleIcon />,
 		url: "/saved-view",
 	},
-	{
-		id: 1,
-		title: "Export",
-		icon: <DatabaseIcon />,
-		url: "/export",
-	},
+	// {
+	// 	id: 1,
+	// 	title: "Export",
+	// 	icon: <DatabaseIcon />,
+	// 	url: "/export",
+	// },
 	{
 		id: 2,
 		title: "Delete",

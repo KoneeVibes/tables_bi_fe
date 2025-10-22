@@ -6,16 +6,19 @@ export const saveQueryService = async (
 	payload: any
 ) => {
 	try {
-		const response = await fetch(`${BASE_ENDPOINT}/api/v1/query/save-query`, {
-			method: "POST",
-			credentials: "include",
-			headers: {
-				Datasource: `${datasource}`,
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(payload),
-		});
+		const response = await fetch(
+			`${BASE_ENDPOINT}/api/v1/saved-view/query/save-query`,
+			{
+				method: "POST",
+				credentials: "include",
+				headers: {
+					Datasource: `${datasource}`,
+					Authorization: `Bearer ${token}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(payload),
+			}
+		);
 		const res = await response.json();
 		if (!response.ok) {
 			console.error("Error:", res);

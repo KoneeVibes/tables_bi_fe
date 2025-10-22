@@ -53,7 +53,7 @@ export const DashboardWrapper = styled(Stack)(({ theme }) => {
 				},
 			},
 		},
-		"& .database-information-form": {
+		"& #database-information-form": {
 			borderRadius: "10px",
 			maxWidth: "43.75rem",
 			boxSizing: "border-box",

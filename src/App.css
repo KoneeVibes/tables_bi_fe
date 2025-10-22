@@ -209,9 +209,23 @@
 		height: auto;
 	}
 
+	.alert-modal .confirmation-modal-header {
+		justify-content: flex-start;
+		padding: var(--basic-padding);
+		border: 1px solid var(--border-color);
+	}
+
 	.alert-modal .alert-modal-body {
 		gap: calc(var(--flex-gap) / 2);
 		padding: 0 var(--basic-padding) var(--basic-padding);
+	}
+
+	.alert-modal .alert-modal-body.confirmation-modal-body {
+		gap: calc(var(--flex-gap));
+	}
+
+	.alert-modal.delete-confirmation-modal .alert-modal-content {
+		gap: calc(var(--flex-gap)) !important;
 	}
 
 	.alert-modal .alert-modal-body > .connection-hints {

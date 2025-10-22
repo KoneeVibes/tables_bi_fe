@@ -433,7 +433,7 @@ export const Dashboard = () => {
 					</form>
 				</Stack>
 				<form
-					className="database-information-form"
+					id="database-information-form"
 					onSubmit={handleDatabaseConnection}
 				>
 					<DatabaseConnectionForm
