@@ -16,7 +16,7 @@ import { BaseDropDownModal } from "../../../component/modal/dropdown";
 import { BaseDropDownType } from "../../../type/component.type";
 import { BaseButton } from "../../../component/button/styled";
 import {
-	TopNavigationNotificationIcon,
+	// TopNavigationNotificationIcon,
 	UserMenuLogoutIcon,
 } from "../../../asset";
 import { userMenuItems } from "../../../config/static";
@@ -38,11 +38,11 @@ export const TopNavigation: React.FC<TopNavigationPropsType> = ({
 
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
-	const handleOpenNotification = (
-		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-	) => {
-		e.preventDefault();
-	};
+	// const handleOpenNotification = (
+	// 	e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	// ) => {
+	// 	e.preventDefault();
+	// };
 
 	const handleDrawerToggle = () => {
 		if (!isSideNavigationClosing) {
@@ -180,7 +180,7 @@ export const TopNavigation: React.FC<TopNavigationPropsType> = ({
 					</Typography>
 				</Box>
 				<Stack className="top-navigation-MS">
-					<Box component={"div"} className="notification-button-box">
+					{/* <Box component={"div"} className="notification-button-box">
 						<IconButton
 							sx={{
 								color: "var(--light-color)",
@@ -191,7 +191,7 @@ export const TopNavigation: React.FC<TopNavigationPropsType> = ({
 						>
 							<TopNavigationNotificationIcon />
 						</IconButton>
-					</Box>
+					</Box> */}
 					<Stack className="logged-in-user-information-stack">
 						<Box component={"div"} className="user-avatar-box">
 							<img
