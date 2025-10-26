@@ -10,6 +10,7 @@ import { AppContext } from "../../../context/appContext";
 
 export const DatasourceSwitchForm: React.FC<DatasourceSwitchTablePropsType> = ({
 	tables,
+	dbList,
 	formDetails,
 	setFormDetails,
 }) => {
@@ -21,7 +22,8 @@ export const DatasourceSwitchForm: React.FC<DatasourceSwitchTablePropsType> = ({
 	};
 	const initialJoinTableCount = 0;
 
-	const { setJoinTableCount } = useContext(AppContext);
+	const { setJoinTableCount, activeConnection, setActiveConnection } =
+		useContext(AppContext);
 
 	const handleChange = (
 		e:
@@ -35,6 +37,12 @@ export const DatasourceSwitchForm: React.FC<DatasourceSwitchTablePropsType> = ({
 			  })
 	) => {
 		const { name, value } = e.target;
+		if (name === "database") {
+			const connection = dbList?.find(
+				(conn: any) => String(conn.id) === String(value)
+			);
+			return setActiveConnection(connection ?? null);
+		}
 		setFormDetails({
 			...initialFormDetails,
 			[name]: value,
@@ -44,7 +52,26 @@ export const DatasourceSwitchForm: React.FC<DatasourceSwitchTablePropsType> = ({
 
 	return (
 		<DatasourceSwitchFormWrapper>
-			<Grid container spacing={"var(--flex-gap)"}>
+			<Grid container spacing={"calc(var(--flex-gap)/2)"}>
+				<Grid size={{ mobile: 12 }}>
+					<BaseFieldSet>
+						<BaseLabel>Database</BaseLabel>
+						<BaseSelect
+							name="database"
+							value={activeConnection?.id ?? " "}
+							onChange={(e) => handleChange(e)}
+						>
+							<BaseOption value=" ">No DB Selected</BaseOption>
+							{dbList?.map((db: Record<string, any>, index: number) => {
+								return (
+									<BaseOption key={index} value={db.id}>
+										{db.dbName}
+									</BaseOption>
+								);
+							})}
+						</BaseSelect>
+					</BaseFieldSet>
+				</Grid>
 				<Grid size={{ mobile: 12 }}>
 					<BaseFieldSet>
 						<BaseLabel>Tables</BaseLabel>

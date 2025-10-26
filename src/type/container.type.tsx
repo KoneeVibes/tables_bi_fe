@@ -30,8 +30,13 @@ export type MainAreaPropsType = {
 	children: React.ReactNode;
 };
 
+export type DatabaseConnectionFormPropsType = {
+	dbType: string;
+} & BaseFormPropsType;
+
 export type DatasourceSwitchTablePropsType = {
 	tables: Record<string, any>[];
+	dbList: Record<string, any>[];
 } & BaseFormPropsType;
 
 export type SelectedDbTableFieldsPropsType = {

@@ -4,12 +4,11 @@ import { BaseLegend } from "../../../component/form/legend/styled";
 import { BaseFieldSet } from "../../../component/form/fieldset/styled";
 import { BaseLabel } from "../../../component/form/label/styled";
 import { BaseInput } from "../../../component/form/input/styled";
-import { BaseFormPropsType } from "../../../type/container.type";
+import { DatabaseConnectionFormPropsType } from "../../../type/container.type";
 
-export const DatabaseConnectionForm: React.FC<BaseFormPropsType> = ({
-	formDetails,
-	setFormDetails,
-}) => {
+export const DatabaseConnectionForm: React.FC<
+	DatabaseConnectionFormPropsType
+> = ({ dbType, formDetails, setFormDetails }) => {
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
 	) => {
@@ -23,7 +22,7 @@ export const DatabaseConnectionForm: React.FC<BaseFormPropsType> = ({
 	return (
 		<DatabaseConnectionFormWrapper>
 			<Box>
-				<BaseLegend>Link your PostgreSQL database</BaseLegend>
+				<BaseLegend>{`Link your ${dbType} database`}</BaseLegend>
 				<Typography
 					variant="body1"
 					fontFamily={"Inter"}

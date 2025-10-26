@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Cookies from "universal-cookie";
 import {
 	Box,
@@ -16,7 +16,11 @@ import dbIcon from "../../asset/icon/bw-db-icon.svg";
 import { DatasourceSwitchForm } from "../../container/form/datasourceswitch";
 import { SelectDbTableField } from "../../container/form/selectdbtablefield";
 import connectedTablesThumbnail from "../../asset/image/connected-tables.png";
-import { ResetIcon, SearchIconPrimaryColorVariant } from "../../asset";
+import {
+	DatabaseLightColorVariantIcon,
+	ResetIcon,
+	SearchIconPrimaryColorVariant,
+} from "../../asset";
 import { SearchIconLightColorVariant } from "../../asset";
 import { QueryResultFilterForm } from "../../container/form/queryresultfilter";
 import { retrieveAllTableFieldService } from "../../util/query/retrieveAllTableFields";
@@ -32,14 +36,29 @@ import { BaseAlertModal } from "../../component/modal/alert";
 import confetti from "../../asset/image/success-confetti.png";
 import { useNavigate } from "react-router-dom";
 import { ResultFilter } from "../../type/container.type";
+import { useQuery } from "@tanstack/react-query";
+import { retrieveAllUserConnectionService } from "../../util/connection/retrieveAllUserConnection";
+import { connectToDBService } from "../../util/connection/connectToDB";
+import spinner from "../../asset/icon/spinner-icon.svg";
+import errorIcon from "../../asset/icon/error-icon.svg";
+import { HashLink } from "react-router-hash-link";
 
 export const Connection = () => {
+	const connectionHints = [
+		"Ensure the Host URL is correct.",
+		"Confirm that your username and password are accurate.",
+		"Verify that your connection port (5432) is open and accessible.",
+		"If you're using a cloud provider (e.g., AWS), check that the database instance is running.",
+	];
+
 	const cookies = new Cookies();
 	const TOKEN = cookies.getAll().TOKEN;
 
 	const navigate = useNavigate();
 	const matches = useMediaQuery("(min-width:250px)");
-	const { joinTableCount, setJoinTableCount } = useContext(AppContext);
+	const { joinTableCount, setJoinTableCount, activeConnection } =
+		useContext(AppContext);
+	const previousActiveConnection = useRef(activeConnection);
 
 	const [isJoining, setIsJoining] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
@@ -53,6 +72,25 @@ export const Connection = () => {
 	const [isSaveQueryFormModalOpen, setIsSaveQueryFormModalOpen] =
 		useState(false);
 	const [queryName, setQueryName] = useState<string>("");
+
+	const [isConnectingToDatabase, setIsConnectingToDatabase] = useState(false);
+	const [databaseConnectionError, setDatabaseConnectionError] = useState<
+		string | null
+	>(null);
+	const [
+		isDatabaseConnectionAlertModalOpen,
+		setIsDatabaseConnectionAlertModalOpen,
+	] = useState(false);
+	const [isDatabaseConnectionSuccessful, setIsDatabaseConnectionSuccessful] =
+		useState(false);
+	const [
+		databaseConnectionAlertModalTexts,
+		setDatabaseConnectionAlertModalTexts,
+	] = useState<Record<string, any>>({
+		header: "Establishing connection..",
+		body: "Please wait while we connect to the database. This might take a few seconds",
+	});
+
 	const [dataSource] = useState<Record<string, any>>(
 		localStorage.getItem("dataSource")
 			? JSON.parse(localStorage.getItem("dataSource") as string)
@@ -91,11 +129,113 @@ export const Connection = () => {
 		datasourceDetailRef.current = datasourceDetails;
 	}, [datasourceDetails]);
 
+	const handleDatabaseConnection = useCallback(
+		async (connectionDetails: Record<string, any>) => {
+			if (!dataSource.name) {
+				return setDatabaseConnectionError(
+					"Please select a datasource to proceed."
+				);
+			}
+			setDatabaseConnectionError(null);
+			setIsConnectingToDatabase(true);
+			setIsDatabaseConnectionAlertModalOpen(true);
+			setIsDatabaseConnectionSuccessful(false);
+			setDatabaseConnectionAlertModalTexts({
+				header: "Establishing connection..",
+				body: "Please wait while we connect to the database. This might take a few seconds",
+			});
+			const messages = [
+				{
+					header: "Establishing connection..",
+					body: "Please wait while we connect to the database. This might take a few seconds",
+				},
+				{
+					header: "Verifying credentials...",
+					body: "Fetching your data from the server. Hang tight while we load the necessary information.",
+				},
+				{
+					header: "Retrieving data...",
+					body: "Checking your credentials and ensuring a secure connection. Please be patient.",
+				},
+			];
+			let index = 0;
+			const interval = setInterval(() => {
+				index++;
+				if (index < messages.length) {
+					setDatabaseConnectionAlertModalTexts(messages[index]);
+				}
+			}, 2000);
+			try {
+				const response = await connectToDBService(
+					TOKEN,
+					connectionDetails,
+					dataSource.name
+				);
+				clearInterval(interval);
+				if (response.status === "success") {
+					setIsConnectingToDatabase(false);
+					setDatabaseConnectionAlertModalTexts({
+						header: "Connection Successful!",
+						body: "Your database connection has been established successfully.",
+					});
+					setIsDatabaseConnectionSuccessful(true);
+					previousActiveConnection.current = activeConnection;
+				} else {
+					setIsConnectingToDatabase(false);
+					setDatabaseConnectionAlertModalTexts({
+						header: "Connection Failed",
+						body: "We couldn't connect to your database. Please check the following:",
+					});
+					setDatabaseConnectionError(
+						"Connection failed. Please check your credentials and try again."
+					);
+				}
+			} catch (error: any) {
+				clearInterval(interval);
+				setIsConnectingToDatabase(false);
+				setDatabaseConnectionAlertModalTexts({
+					header: "Connection Failed",
+					body: "We couldn't connect to your database. Please check the following:",
+				});
+				setDatabaseConnectionError(`Connection failed. ${error.message}`);
+				console.error("Connection failed:", error);
+			}
+		},
+		[
+			TOKEN,
+			dataSource.name,
+			activeConnection,
+			setDatabaseConnectionError,
+			setIsConnectingToDatabase,
+			setIsDatabaseConnectionAlertModalOpen,
+			setIsDatabaseConnectionSuccessful,
+			setDatabaseConnectionAlertModalTexts,
+		]
+	);
+
 	useEffect(() => {
 		const handleRetrieveAllTable = async () => {
+			setDbTables([]);
+			setDbTableFields([]);
+			setDatasourceDetails({
+				primaryTable: " ",
+				secondaryTable_0: " ",
+				primaryTableFields: [],
+				secondaryTable_0_Fields: [],
+			});
 			if (!dataSource.name) {
 				console.error("Please select a datasource to proceed.");
 				return;
+			}
+			if (!activeConnection) return;
+			if (previousActiveConnection.current !== activeConnection) {
+				await handleDatabaseConnection({
+					host: activeConnection.host,
+					port: activeConnection.port,
+					username: activeConnection.user,
+					password: activeConnection.password,
+					dbName: activeConnection.dbName,
+				});
 			}
 			try {
 				const response = await retrieveAllTableService(TOKEN, dataSource.name);
@@ -109,7 +249,7 @@ export const Connection = () => {
 			}
 		};
 		handleRetrieveAllTable();
-	}, [TOKEN, dataSource.name]);
+	}, [TOKEN, dataSource.name, activeConnection, handleDatabaseConnection]);
 
 	useEffect(() => {
 		const handleRetrieveAllTableFields = async () => {
@@ -275,6 +415,36 @@ export const Connection = () => {
 		fetchRelationships();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [datasourceDetails]);
+
+	const { data: savedConnections = [] } = useQuery({
+		queryKey: ["savedConnections", TOKEN],
+		queryFn: async () => {
+			const response = await retrieveAllUserConnectionService(TOKEN);
+			const uniqueConnections = new Map<string, any>();
+			const mapped = response?.map((connection: any, index: number) => ({
+				...connection,
+				id: index + 1,
+			}));
+			// just adding here that we can improve this config of course
+			// 1. By having an endpoint that returns all pool connections in memory
+			// 2. By designing activeConnection in such a way that it can hold an array of active connections,
+			// so that in the case one connects to multiple dbs but does not go to the connections page to trigger
+			// this query, active connections would hold the multiple connections in memory.
+			if (activeConnection) {
+				mapped.push({ ...activeConnection });
+			}
+			mapped.forEach((connection: any) => {
+				const key = `${connection.user}-${connection.host}-${connection.dbName}-${connection.dbType}-${connection.port}-${connection.password}`;
+				if (!uniqueConnections.has(key)) {
+					uniqueConnections.set(key, connection);
+				} else if (connection.id === "*") {
+					uniqueConnections.set(key, connection);
+				}
+			});
+			return Array.from(uniqueConnections.values());
+		},
+		enabled: !!TOKEN,
+	});
 
 	const handleRetrieveAllTableRelationship = async (): Promise<boolean> => {
 		if (!dataSource.name) {
@@ -505,7 +675,12 @@ export const Connection = () => {
 		setIsAlertModalOpen(false);
 	};
 
-	const handleNavigateToConnection = (
+	const handleDatabaseConnectionAlertModalPersist = () => {
+		if (isConnectingToDatabase) return;
+		setIsDatabaseConnectionAlertModalOpen(false);
+	};
+
+	const handleNavigateToSavedView = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
 		e.preventDefault();
@@ -605,7 +780,7 @@ export const Connection = () => {
 					disableElevation
 					variant="contained"
 					sx={{ width: "100%" }}
-					onClick={handleNavigateToConnection}
+					onClick={handleNavigateToSavedView}
 				>
 					<Typography
 						variant={"button"}
@@ -623,6 +798,145 @@ export const Connection = () => {
 		</Stack>
 	);
 
+	const databaseConnectionAlertIcon = (
+		<Box
+			component={"div"}
+			className={`alert-modal-item ${
+				databaseConnectionError
+					? "alert-modal-icon"
+					: isDatabaseConnectionSuccessful
+					? "alert-modal-icon alert-modal-confetti-icon"
+					: "alert-modal-icon alert-modal-spinning-icon"
+			}`}
+		>
+			<img
+				src={
+					databaseConnectionError
+						? errorIcon
+						: isDatabaseConnectionSuccessful
+						? confetti
+						: spinner
+				}
+				alt={
+					databaseConnectionError
+						? "Error Icon"
+						: isDatabaseConnectionSuccessful
+						? "Success Confetti"
+						: "Spinning Loader"
+				}
+			/>
+		</Box>
+	);
+
+	const databaseConnectionAlertHeader = (
+		<Box component={"div"} className="alert-modal-item alert-modal-header">
+			<Typography
+				variant="h3"
+				fontFamily={"Inter"}
+				fontWeight={600}
+				fontSize={"20px"}
+				lineHeight={"normal"}
+				color="var(--form-header-color)"
+				textAlign={"center"}
+				whiteSpace={"normal"}
+			>
+				{databaseConnectionAlertModalTexts.header}
+			</Typography>
+		</Box>
+	);
+
+	const databaseConnectionAlertBody = (
+		<Stack className="alert-modal-item alert-modal-body">
+			<Box>
+				<Typography
+					variant="body1"
+					fontFamily={"Inter"}
+					fontWeight={500}
+					fontSize={"14px"}
+					lineHeight={"normal"}
+					color="var(--form-header-color)"
+					textAlign={"center"}
+					whiteSpace={"normal"}
+				>
+					{databaseConnectionAlertModalTexts.body}
+				</Typography>
+			</Box>
+			{isDatabaseConnectionSuccessful && (
+				<Box overflow={"hidden"}>
+					<BaseButton
+						disableElevation
+						variant="contained"
+						sx={{ width: "100%" }}
+						onClick={handleDatabaseConnectionAlertModalPersist}
+					>
+						<Typography
+							variant={"button"}
+							fontFamily={"inherit"}
+							fontWeight={"inherit"}
+							fontSize={"inherit"}
+							lineHeight={"inherit"}
+							color={"inherit"}
+							textTransform={"inherit"}
+						>
+							Continue
+						</Typography>
+					</BaseButton>
+				</Box>
+			)}
+			{databaseConnectionError && (
+				<Box component={"div"} className="connection-hints">
+					<ul>
+						{connectionHints.map((hint, index) => (
+							<li key={index}>{hint}</li>
+						))}
+					</ul>
+				</Box>
+			)}
+			{databaseConnectionError && (
+				<Stack className="complaint-handling">
+					<Box>
+						<Typography
+							variant="subtitle1"
+							fontFamily={"Inter"}
+							fontWeight={"600"}
+							fontSize={14}
+							lineHeight={"normal"}
+							color={"var(--form-header-color)"}
+							whiteSpace={"normal"}
+						>
+							Having issues?
+						</Typography>
+					</Box>
+					<Box>
+						<Typography
+							variant="body1"
+							fontFamily={"Inter"}
+							fontWeight={"500"}
+							fontSize={12}
+							lineHeight={"normal"}
+							color={"var(--subtitle-grey-color)"}
+							whiteSpace={"normal"}
+						>
+							<Typography
+								component={"a"}
+								fontFamily={"inherit"}
+								fontWeight={"inherit"}
+								fontSize={"inherit"}
+								lineHeight={"inherit"}
+								color={"inherit"}
+								textTransform={"inherit"}
+								sx={{ textDecoration: "underline", cursor: "pointer" }}
+							>
+								Reach out to support
+							</Typography>{" "}
+							- we're happy to assist you.
+						</Typography>
+					</Box>
+				</Stack>
+			)}
+		</Stack>
+	);
+
 	return (
 		<AppLayout pageId="Connection" pageTitle="Connections">
 			<ConnectionWrapper>
@@ -633,6 +947,14 @@ export const Connection = () => {
 					body={alertBody}
 					className="alert-modal"
 					handleClose={handleAlertModalPersist}
+				/>
+				<BaseAlertModal
+					open={isDatabaseConnectionAlertModalOpen}
+					icon={databaseConnectionAlertIcon}
+					header={databaseConnectionAlertHeader}
+					body={databaseConnectionAlertBody}
+					className="alert-modal"
+					handleClose={handleDatabaseConnectionAlertModalPersist}
 				/>
 				<SaveQueryForm
 					isLoading={isSaving}
@@ -647,27 +969,70 @@ export const Connection = () => {
 					<Stack
 						direction={"row"}
 						alignItems={"center"}
-						gap={"calc(var(--flex-gap)/4)"}
+						gap={"calc(var(--flex-gap)/2)"}
+						justifyContent={"space-between"}
 					>
-						<Box overflow={"hidden"}>
-							<img src={dbIcon} alt="db-icon" />
-						</Box>
-						<Box overflow={"hidden"}>
-							<Typography
-								variant="h2"
-								fontFamily={"Inter"}
-								fontWeight={600}
-								fontSize={"16px"}
-								lineHeight={"normal"}
-								color="var(--form-header-color)"
+						<Stack
+							direction={"row"}
+							overflow={"hidden"}
+							alignItems={"center"}
+							gap={"calc(var(--flex-gap)/4)"}
+						>
+							<Box overflow={"hidden"} flexShrink={0}>
+								<img src={dbIcon} alt="db-icon" />
+							</Box>
+							<Box overflow={"hidden"}>
+								<Typography
+									variant="h2"
+									fontFamily={"Inter"}
+									fontWeight={600}
+									fontSize={"16px"}
+									lineHeight={"normal"}
+									color="var(--form-header-color)"
+								>
+									Data Source
+								</Typography>
+							</Box>
+						</Stack>
+						<Box overflow={"hidden"} justifyContent={{ tablet: "flex-end" }}>
+							<HashLink
+								smooth
+								style={{ textDecoration: "none" }}
+								to={"/dashboard#database-information-form"}
 							>
-								Data Source
-							</Typography>
+								<BaseButton
+									disableElevation
+									variant="contained"
+									startIcon={<DatabaseLightColorVariantIcon />}
+									padding="calc(var(--basic-padding)/2)"
+									sx={{
+										width: {
+											mobile: "100%",
+											tablet: "auto",
+											laptop: "100%",
+											desktop: "auto",
+										},
+									}}
+								>
+									<Typography
+										variant={"button"}
+										fontFamily={"inherit"}
+										fontWeight={"inherit"}
+										fontSize={"inherit"}
+										lineHeight={"inherit"}
+										color={"inherit"}
+										textTransform={"inherit"}
+									>
+										Connect
+									</Typography>
+								</BaseButton>
+							</HashLink>
 						</Box>
 					</Stack>
 					<form>
 						<DatasourceSwitchForm
 							tables={dbTables}
+							dbList={savedConnections}
 							formDetails={datasourceDetails}
 							setFormDetails={setDatasourceDetails}
 						/>

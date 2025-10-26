@@ -14,6 +14,10 @@ export const AppContextProvider: React.FC<ContextProviderPropsType> = ({
 	const [profileCompletionActiveTabIndex, setProfileCompletionActiveTabIndex] =
 		useState(0);
 	const [joinTableCount, setJoinTableCount] = useState<number>(0);
+	const [activeConnection, setActiveConnection] = useState<Record<
+		string,
+		any
+	> | null>(null);
 
 	return (
 		<AppContext.Provider
@@ -30,6 +34,8 @@ export const AppContextProvider: React.FC<ContextProviderPropsType> = ({
 				setProfileCompletionActiveTabIndex,
 				joinTableCount,
 				setJoinTableCount,
+				activeConnection,
+				setActiveConnection,
 			}}
 		>
 			{children}

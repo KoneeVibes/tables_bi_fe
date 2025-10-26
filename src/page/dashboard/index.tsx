@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Box, CircularProgress, Grid, Stack, Typography } from "@mui/material";
 import { AppLayout } from "../../container/layout/app";
 import { DashboardWrapper } from "./styled";
@@ -15,6 +15,7 @@ import spinner from "../../asset/icon/spinner-icon.svg";
 import errorIcon from "../../asset/icon/error-icon.svg";
 import confetti from "../../asset/image/success-confetti.png";
 import { useNavigate } from "react-router-dom";
+import { AppContext } from "../../context/appContext";
 
 export const Dashboard = () => {
 	const connectionHints = [
@@ -28,6 +29,7 @@ export const Dashboard = () => {
 	const TOKEN = cookies.getAll().TOKEN;
 
 	const navigate = useNavigate();
+	const { setActiveConnection } = useContext(AppContext);
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -129,6 +131,15 @@ export const Dashboard = () => {
 					body: "Your database connection has been established successfully.",
 				});
 				setIsConnectionSuccessful(true);
+				setActiveConnection({
+					id: "*",
+					user: connectionDetails.username,
+					host: connectionDetails.host,
+					dbName: connectionDetails.dbName,
+					dbType: dataSource.name,
+					port: connectionDetails.port,
+					password: connectionDetails.password,
+				});
 			} else {
 				setIsLoading(false);
 				setAlertModalTexts({
@@ -437,6 +448,7 @@ export const Dashboard = () => {
 					onSubmit={handleDatabaseConnection}
 				>
 					<DatabaseConnectionForm
+						dbType={dataSource.name}
 						formDetails={connectionDetails}
 						setFormDetails={setConnectionDetails}
 					/>

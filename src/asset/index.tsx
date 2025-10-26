@@ -15,5 +15,6 @@ export { ReactComponent as ResetIcon } from "../asset/icon/reset-icon.svg";
 export { ReactComponent as VerticalEllipsisIcon } from "../asset/icon/vertical-ellipsis-icon.svg";
 export { ReactComponent as VisibleIcon } from "../asset/icon/visible-icon.svg";
 export { ReactComponent as DatabaseIcon } from "../asset/icon/db-icon.svg";
+export { ReactComponent as DatabaseLightColorVariantIcon } from "../asset/icon/db-icon-light-color-variant.svg";
 export { ReactComponent as DeleteIcon } from "../asset/icon/delete-icon.svg";
 export { ReactComponent as PrimaryColorDeleteIcon } from "../asset/icon/delete-icon-primary-color-variant.svg";

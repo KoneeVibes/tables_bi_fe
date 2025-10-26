@@ -17,4 +17,8 @@ export type AppContextType = {
 	>;
 	joinTableCount: number;
 	setJoinTableCount: React.Dispatch<React.SetStateAction<number>>;
+	activeConnection: Record<string, any> | null;
+	setActiveConnection: React.Dispatch<
+		React.SetStateAction<Record<string, any> | null>
+	>;
 };
