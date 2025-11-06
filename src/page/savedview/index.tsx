@@ -25,6 +25,9 @@ import { BaseButton } from "../../component/button/styled";
 import { queryMenuItems } from "../../config/static";
 import { deleteSavedQueryService } from "../../util/savedview/deleteSavedQuery";
 import { BaseAlertModal } from "../../component/modal/alert";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
+import { joinTablesService } from "../../util/query/runJoin";
 
 export const SavedView = () => {
 	const cookies = new Cookies();
@@ -36,9 +39,13 @@ export const SavedView = () => {
 	const dropdownRef = useRef<HTMLUListElement | null>(null);
 
 	const [isDeleting, setIsDeleting] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [deleteError, setDeleteError] = useState<string | null>(null);
 	const [activeTabIndex, setActiveTabIndex] = useState(0);
 	const [isQueryMenuOpen, setIsQueryMenuOpen] = useState(false);
+	const [exportError, setExportError] = useState<string | null>(null);
+	const [queryResult, setQueryResult] = useState<Record<string, any>[] | null>(
+		null
+	);
 	const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
 	const [selectedQuery, setSelectedQuery] = useState<Record<
 		string,
@@ -71,7 +78,10 @@ export const SavedView = () => {
 				},
 				{} as Record<string, typeof response>
 			);
-			return groupedByDate;
+			return {
+				grouped: groupedByDate,
+				flat: response,
+			};
 		},
 		enabled: !!TOKEN,
 	});
@@ -124,16 +134,89 @@ export const SavedView = () => {
 				});
 			} else {
 				setIsDeleting(false);
-				setError("Deletion failed. Please try again.");
+				setDeleteError("Deletion failed. Please try again.");
 			}
 		} catch (error: any) {
 			setIsDeleting(false);
-			setError(`Deletion failed. ${error.message}`);
+			setDeleteError(`Deletion failed. ${error.message}`);
 			console.error("Deletion failed:", error);
 		}
 	};
 
-	const handleMenuItemClick = (
+	const joinTables = async () => {
+		try {
+			setQueryResult(null);
+			const connectionConfig =
+				savedQuery?.flat?.[Number(selectedQuery?.index)]?.connectionConfig;
+			if (!connectionConfig) return;
+			const payload = {
+				connectionConfig,
+				datasourceDetails:
+					savedQuery?.flat?.[Number(selectedQuery?.index)]?.datasourceDetails,
+				tableRelationship:
+					savedQuery?.flat?.[Number(selectedQuery?.index)]?.tableRelationships,
+			};
+			const filter = { checkForActiveConnection: false };
+			const response = await joinTablesService(
+				TOKEN,
+				connectionConfig?.dbType,
+				payload,
+				filter
+			);
+			if (response.status === "success") {
+				setQueryResult(response.data);
+				return response.data;
+			} else {
+				console.error(
+					"Join tables failed. Please check your credentials and try again."
+				);
+			}
+		} catch (error: any) {
+			console.error("Join tables failed:", error);
+		}
+	};
+
+	const handleExportQuery = async (
+		e: React.MouseEvent,
+		dataOverride?: any[]
+	) => {
+		e.preventDefault();
+		setExportError(null);
+
+		const exportData = dataOverride || queryResult;
+		if (!exportData || exportData.length <= 0) {
+			setExportError("No query result available to export.");
+			return;
+		}
+		try {
+			const workbook = new ExcelJS.Workbook();
+			const worksheet = workbook.addWorksheet("Query Table");
+
+			const columns = Object.keys(exportData[0]).map((key) => ({
+				header: key,
+				key,
+				width: 20,
+			}));
+
+			worksheet.columns = columns;
+			worksheet.addRows(exportData);
+			worksheet.getRow(1).font = { bold: true };
+			worksheet.getRow(1).alignment = { horizontal: "center" };
+
+			const buffer = await workbook.xlsx.writeBuffer();
+			const blob = new Blob([buffer], {
+				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			});
+			saveAs(blob, `TablesBI - Query Table.xlsx`);
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : "An unexpected error occurred";
+			setExportError(`Query export failed. ${errorMessage}`);
+			console.error("Query export failed:", error);
+		}
+	};
+
+	const handleMenuItemClick = async (
 		e: React.MouseEvent<HTMLLIElement, MouseEvent>,
 		item: Record<string, any>,
 		index: number
@@ -143,17 +226,21 @@ export const SavedView = () => {
 			case 0:
 				navigate(`${item.url}/${index}` as string);
 				break;
-			// case 1:
-			//     // export functionality should go in here
-			// 	break;
+			case 1:
+				const joinedData = await joinTables();
+				if (joinedData) {
+					await handleExportQuery(e, joinedData);
+				}
+				break;
 			case 2:
-				setError(null);
+				setDeleteError(null);
 				setIsConfirmationModalOpen(true);
 				break;
 			default:
 				handleCloseQueryMenu();
 				break;
 		}
+		handleCloseQueryMenu();
 	};
 
 	const handleDropDownClickOutside = useCallback(
@@ -234,7 +321,7 @@ export const SavedView = () => {
 					</Typography>
 				</Box>
 			</Stack>
-			{error && (
+			{deleteError && (
 				<Box>
 					<Typography
 						fontFamily={"Inter"}
@@ -245,7 +332,22 @@ export const SavedView = () => {
 						whiteSpace={"normal"}
 						textAlign={"center"}
 					>
-						{error}
+						{deleteError}
+					</Typography>
+				</Box>
+			)}
+			{exportError && (
+				<Box>
+					<Typography
+						fontFamily={"Inter"}
+						fontWeight={"600"}
+						fontSize={14}
+						lineHeight={"normal"}
+						color={"var(--error-red-color)"}
+						whiteSpace={"normal"}
+						textAlign={"center"}
+					>
+						{exportError}
 					</Typography>
 				</Box>
 			)}
@@ -379,8 +481,8 @@ export const SavedView = () => {
 				</Stack>
 				<Stack className="query-stack">
 					{activeTabIndex === 0 &&
-						savedQuery &&
-						Object.entries(savedQuery as Record<string, any>).map(
+						savedQuery?.grouped &&
+						Object.entries(savedQuery?.grouped as Record<string, any>).map(
 							([key, results], resultIndex) => {
 								const resultArray = Array.isArray(results)
 									? results

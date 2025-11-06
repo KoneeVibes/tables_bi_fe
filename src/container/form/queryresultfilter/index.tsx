@@ -9,6 +9,7 @@ import sortIcon from "../../../asset/icon/sort-icon.svg";
 import { BaseInput } from "../../../component/form/input/styled";
 import { PrimaryColorDeleteIcon } from "../../../asset";
 import { BaseButton } from "../../../component/button/styled";
+import { useState } from "react";
 
 export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 	fields,
@@ -25,6 +26,9 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 		"less than",
 		"contains",
 	];
+
+	const [isSortSelectOpen, setIsSortSelectOpen] = useState(false);
+	const [isFilterSelectOpen, setIsFilterSelectOpen] = useState(false);
 
 	const handleChange = (
 		e:
@@ -104,10 +108,48 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 		}));
 	};
 
+	const handleOpenFilterSelect = (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+		if (!isFilterSelectOpen) setIsFilterSelectOpen(true);
+	};
+
+	const handleCloseFilterSelect = () => {
+		setIsFilterSelectOpen(false);
+	};
+
+	const handleApplyFilter = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+		setIsFilterSelectOpen(false);
+		return await handleFiltering(e);
+	};
+
+	const handleOpenSortSelect = (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+		if (!isSortSelectOpen) setIsSortSelectOpen(true);
+	};
+
+	const handleCloseSortSelect = () => {
+		setIsSortSelectOpen(false);
+	};
+
+	const handleApplySort = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+		setIsSortSelectOpen(false);
+		return await handleSorting(e);
+	};
+
 	return (
 		<QueryResultFilterFormWrapper>
 			<Grid container spacing={"calc(var(--flex-gap)/4)"}>
-				<Grid size={{ mobile: 12, miniTablet: 4, tablet: 6 }}>
+				<Grid size={{ mobile: 12, miniTablet: 6 }}>
 					<BaseFieldSet>
 						<Stack
 							direction={"row"}
@@ -132,6 +174,9 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 								name="sort"
 								border="none"
 								displayEmpty
+								open={isSortSelectOpen}
+								onClick={handleOpenSortSelect}
+								onClose={handleCloseSortSelect}
 								renderValue={() => <em>Sort</em>}
 								MenuProps={{
 									anchorOrigin: { vertical: "bottom", horizontal: "left" },
@@ -395,7 +440,7 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 											<BaseButton
 												variant="contained"
 												disableElevation
-												onClick={handleSorting}
+												onClick={handleApplySort}
 												sx={{ width: "100%", height: "100%" }}
 												padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
 											>
@@ -418,7 +463,7 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 						</Stack>
 					</BaseFieldSet>
 				</Grid>
-				<Grid size={{ mobile: 12, miniTablet: 4, tablet: 6 }}>
+				<Grid size={{ mobile: 12, miniTablet: 6 }}>
 					<BaseFieldSet>
 						<Stack
 							direction={"row"}
@@ -443,6 +488,9 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 								name="filter"
 								border="none"
 								displayEmpty
+								open={isFilterSelectOpen}
+								onClick={handleOpenFilterSelect}
+								onClose={handleCloseFilterSelect}
 								renderValue={() => <em>Filter</em>}
 								MenuProps={{
 									anchorOrigin: { vertical: "bottom", horizontal: "left" },
@@ -733,7 +781,7 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 											<BaseButton
 												variant="contained"
 												disableElevation
-												onClick={handleFiltering}
+												onClick={handleApplyFilter}
 												sx={{ width: "100%", height: "100%" }}
 												padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
 											>

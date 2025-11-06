@@ -16,11 +16,7 @@ import dbIcon from "../../asset/icon/bw-db-icon.svg";
 import { DatasourceSwitchForm } from "../../container/form/datasourceswitch";
 import { SelectDbTableField } from "../../container/form/selectdbtablefield";
 import connectedTablesThumbnail from "../../asset/image/connected-tables.png";
-import {
-	DatabaseLightColorVariantIcon,
-	ResetIcon,
-	SearchIconPrimaryColorVariant,
-} from "../../asset";
+import { DatabaseLightColorVariantIcon, ResetIcon } from "../../asset";
 import { SearchIconLightColorVariant } from "../../asset";
 import { QueryResultFilterForm } from "../../container/form/queryresultfilter";
 import { retrieveAllTableFieldService } from "../../util/query/retrieveAllTableFields";
@@ -42,6 +38,8 @@ import { connectToDBService } from "../../util/connection/connectToDB";
 import spinner from "../../asset/icon/spinner-icon.svg";
 import errorIcon from "../../asset/icon/error-icon.svg";
 import { HashLink } from "react-router-hash-link";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 export const Connection = () => {
 	const connectionHints = [
@@ -62,12 +60,17 @@ export const Connection = () => {
 
 	const [isJoining, setIsJoining] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
+	const [isExporting, setIsExporting] = useState(false);
 	const [joiningError, setJoiningError] = useState<string | null>(null);
 	const [saveQueryError, setSaveQueryError] = useState<string | null>(null);
+	const [exportError, setExportError] = useState<string | null>(null);
 	const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
 	const [queryResult, setQueryResult] = useState<Record<string, any>[] | null>(
 		null
 	);
+	const [baseQueryResult, setBaseQueryResult] = useState<
+		Record<string, any>[] | null
+	>(null);
 	const [selectedRows, setSelectedRows] = useState<number[]>([]);
 	const [isSaveQueryFormModalOpen, setIsSaveQueryFormModalOpen] =
 		useState(false);
@@ -502,49 +505,15 @@ export const Connection = () => {
 		return !isNaN(parseFloat(value)) && isFinite(value);
 	};
 
-	const handleSorting = async (
+	const handleApplyFiltersAndSorting = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
-		// refetch join
-		const latestData = await handleJoinTable(e);
-		if (!latestData) return;
-		let sorted = [...latestData];
-		resultFilter.sort.forEach(async ({ field, value }) => {
-			if (!field.trim() || !value.trim()) {
-				return;
-			}
-			sorted.sort((a, b) => {
-				const aVal = a[field];
-				const bVal = b[field];
-				if (aVal == null) return 1;
-				if (bVal == null) return -1;
-				const aIsNum = isNumeric(aVal);
-				const bIsNum = isNumeric(bVal);
-				if (aIsNum && bIsNum) {
-					return value.toLowerCase() === "ascending"
-						? parseFloat(aVal) - parseFloat(bVal)
-						: parseFloat(bVal) - parseFloat(aVal);
-				}
-				return value.toLowerCase() === "ascending"
-					? String(aVal).localeCompare(String(bVal))
-					: String(bVal).localeCompare(String(aVal));
-			});
-		});
-		setQueryResult(sorted);
-	};
-
-	const handleFiltering = async (
-		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-	) => {
-		// refetch join
-		const latestData = await handleJoinTable(e);
-		if (!latestData) return;
-		let filtered = [...latestData];
-		resultFilter.filter.forEach(async ({ field, criteria, value }) => {
-			if (!field.trim() || !criteria.trim() || !String(value).trim()) {
-				return;
-			}
-			filtered = filtered.filter((row) => {
+		e.stopPropagation();
+		if (!baseQueryResult) return;
+		let result = [...baseQueryResult];
+		resultFilter.filter.forEach(({ field, criteria, value }) => {
+			if (!field.trim() || !criteria.trim() || !String(value).trim()) return;
+			result = result.filter((row) => {
 				const fieldValue = row[field];
 				if (fieldValue == null) return false;
 				const fieldIsNumeric = isNumeric(fieldValue);
@@ -561,22 +530,41 @@ export const Connection = () => {
 					case "not equals":
 						return left !== right;
 					case "greater than":
-						if (!fieldIsNumeric || !valueIsNumeric) return false;
-						return left > right;
+						return fieldIsNumeric && valueIsNumeric && left > right;
 					case "less than":
-						if (!fieldIsNumeric || !valueIsNumeric) return false;
-						return left < right;
+						return fieldIsNumeric && valueIsNumeric && left < right;
 					case "contains":
-						if (fieldIsNumeric) return false;
-						return String(fieldValue)
-							.toLowerCase()
-							.includes(String(value).toLowerCase());
+						return (
+							!fieldIsNumeric &&
+							String(fieldValue)
+								.toLowerCase()
+								.includes(String(value).toLowerCase())
+						);
 					default:
 						return true;
 				}
 			});
 		});
-		setQueryResult(filtered);
+		resultFilter.sort.forEach(({ field, value }) => {
+			if (!field.trim() || !value.trim()) return;
+			result.sort((a, b) => {
+				const aVal = a[field];
+				const bVal = b[field];
+				if (aVal == null) return 1;
+				if (bVal == null) return -1;
+				const aIsNum = isNumeric(aVal);
+				const bIsNum = isNumeric(bVal);
+				if (aIsNum && bIsNum) {
+					return value.toLowerCase() === "ascending"
+						? parseFloat(aVal) - parseFloat(bVal)
+						: parseFloat(bVal) - parseFloat(aVal);
+				}
+				return value.toLowerCase() === "ascending"
+					? String(aVal).localeCompare(String(bVal))
+					: String(bVal).localeCompare(String(aVal));
+			});
+		});
+		setQueryResult(result);
 	};
 
 	const handleAddTable = async (
@@ -625,6 +613,7 @@ export const Connection = () => {
 		e.preventDefault();
 		setJoiningError(null);
 		setQueryResult(null);
+		setBaseQueryResult(null);
 		setIsJoining(true);
 		if (!dataSource.name) {
 			console.error("Please select a datasource to proceed.");
@@ -645,6 +634,7 @@ export const Connection = () => {
 			if (response.status === "success") {
 				setIsJoining(false);
 				setQueryResult(response.data);
+				setBaseQueryResult(response.data);
 				const fields: string[] = (response.data ?? []).flatMap(
 					(result: Record<string, any>) => Object.keys(result ?? {})
 				);
@@ -730,6 +720,50 @@ export const Connection = () => {
 			setIsSaving(false);
 			setSaveQueryError(`Save query failed. ${error.message}`);
 			console.error("Save query failed:", error);
+		}
+	};
+
+	const handleExportQuery = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.preventDefault();
+		setIsExporting(true);
+		setExportError(null);
+		if (!queryResult || queryResult.length <= 0) {
+			setExportError("No query result available to export.");
+			setIsExporting(false);
+			return;
+		}
+		try {
+			const workbook = new ExcelJS.Workbook();
+			const worksheet = workbook.addWorksheet("Query Table");
+			const columns =
+				queryResult.length > 0
+					? Object.keys(queryResult[0]).map((key) => ({
+							header: key,
+							key,
+							width: 20,
+					  }))
+					: [];
+
+			worksheet.columns = columns;
+			worksheet.addRows(queryResult);
+
+			worksheet.getRow(1).font = { bold: true };
+			worksheet.getRow(1).alignment = { horizontal: "center" };
+
+			const buffer = await workbook.xlsx.writeBuffer();
+			const blob = new Blob([buffer], {
+				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			});
+			saveAs(blob, `TablesBI - Query Table.xlsx`);
+			setIsExporting(false);
+		} catch (error) {
+			setIsExporting(false);
+			const errorMessage =
+				error instanceof Error ? error.message : "An unexpected error occurred";
+			setExportError(`Query export failed. ${errorMessage}`);
+			console.error("Query export failed:", error);
 		}
 	};
 
@@ -1202,9 +1236,9 @@ export const Connection = () => {
 									variant="contained"
 									disableElevation
 									disabled={isJoining}
-									bgcolor="var(--stepper-color)"
+									bgcolor="var(--shiny-black-color)"
 									padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
-									startIcon={<SearchIconPrimaryColorVariant />}
+									startIcon={<SearchIconLightColorVariant />}
 									sx={{ width: matches ? "auto" : "100%" }}
 									onClick={handleJoinTable}
 								>
@@ -1218,7 +1252,7 @@ export const Connection = () => {
 											fontWeight={"inherit"}
 											fontSize={"inherit"}
 											lineHeight={"inherit"}
-											color={"var(--primary-color)"}
+											color={"var(--light-color)"}
 											textTransform={"inherit"}
 											visibility={isJoining ? "hidden" : "visible"}
 										>
@@ -1277,43 +1311,78 @@ export const Connection = () => {
 										formDetails={resultFilter}
 										fields={resultFilterFields}
 										setFormDetails={setResultFilter}
-										handleSorting={handleSorting}
-										handleFiltering={handleFiltering}
+										handleSorting={handleApplyFiltersAndSorting}
+										handleFiltering={handleApplyFiltersAndSorting}
 									/>
 								</form>
-								<Box overflow={"hidden"} height={"-webkit-fill-available"}>
-									<BaseButton
-										disabled={
-											isSaving || !queryResult || queryResult.length === 0
-										}
-										disableElevation
-										variant="contained"
-										sx={{
-											height: "inherit",
-											width: {
-												mobile: matches ? "auto" : "100%",
-												tablet: "100%",
-												xl: "auto",
-											},
-										}}
-										startIcon={<SearchIconLightColorVariant />}
-										padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
-										onClick={handleOpenSaveQueryFormModal}
+								<Stack className="query-result-call-to-action">
+									<Box
+										overflow={"hidden"}
+										height={"-webkit-fill-available"}
+										width={{ mobile: "100%", miniTablet: "auto", xl: "100%" }}
 									>
-										<Typography
-											variant={"button"}
-											fontFamily={"inherit"}
-											fontWeight={"inherit"}
-											fontSize={"inherit"}
-											lineHeight={"inherit"}
-											color={"inherit"}
-											textTransform={"inherit"}
-											visibility={isSaving ? "hidden" : "visible"}
+										<BaseButton
+											disabled={
+												isSaving || !queryResult || queryResult.length === 0
+											}
+											disableElevation
+											variant="contained"
+											sx={{
+												height: "inherit",
+												width: "100%",
+											}}
+											startIcon={<SearchIconLightColorVariant />}
+											padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
+											onClick={handleOpenSaveQueryFormModal}
 										>
-											Save Table
-										</Typography>
-									</BaseButton>
-								</Box>
+											<Typography
+												variant={"button"}
+												fontFamily={"inherit"}
+												fontWeight={"inherit"}
+												fontSize={"inherit"}
+												lineHeight={"inherit"}
+												color={"inherit"}
+												textTransform={"inherit"}
+												visibility={isSaving ? "hidden" : "visible"}
+											>
+												Save
+											</Typography>
+										</BaseButton>
+									</Box>
+									<Box
+										overflow={"hidden"}
+										height={"-webkit-fill-available"}
+										width={{ mobile: "100%", miniTablet: "auto", xl: "100%" }}
+									>
+										<BaseButton
+											disabled={
+												isExporting || !queryResult || queryResult.length === 0
+											}
+											disableElevation
+											variant="contained"
+											sx={{
+												height: "inherit",
+												width: "100%",
+											}}
+											startIcon={<SearchIconLightColorVariant />}
+											padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
+											onClick={handleExportQuery}
+										>
+											<Typography
+												variant={"button"}
+												fontFamily={"inherit"}
+												fontWeight={"inherit"}
+												fontSize={"inherit"}
+												lineHeight={"inherit"}
+												color={"inherit"}
+												textTransform={"inherit"}
+												visibility={isExporting ? "hidden" : "visible"}
+											>
+												Export
+											</Typography>
+										</BaseButton>
+									</Box>
+								</Stack>
 							</Stack>
 						</Stack>
 						<Box
@@ -1345,6 +1414,20 @@ export const Connection = () => {
 										textAlign={"center"}
 									>
 										{joiningError}
+									</Typography>
+								</Box>
+							) : exportError ? (
+								<Box>
+									<Typography
+										fontFamily={"Inter"}
+										fontWeight={"600"}
+										fontSize={14}
+										lineHeight={"normal"}
+										color={"var(--error-red-color)"}
+										whiteSpace={"normal"}
+										textAlign={"center"}
+									>
+										{exportError}
 									</Typography>
 								</Box>
 							) : (

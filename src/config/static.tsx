@@ -1,5 +1,5 @@
 import {
-	// DatabaseIcon,
+	DatabaseIcon,
 	DeleteIcon,
 	SideNavigationConnectionIcon,
 	SideNavigationDashboardIcon,
@@ -91,12 +91,12 @@ export const queryMenuItems = [
 		icon: <VisibleIcon />,
 		url: "/saved-view",
 	},
-	// {
-	// 	id: 1,
-	// 	title: "Export",
-	// 	icon: <DatabaseIcon />,
-	// 	url: "/export",
-	// },
+	{
+		id: 1,
+		title: "Export",
+		icon: <DatabaseIcon />,
+		url: "/export",
+	},
 	{
 		id: 2,
 		title: "Delete",

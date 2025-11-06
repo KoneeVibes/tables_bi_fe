@@ -9,6 +9,11 @@ export const QueryResultWrapper = styled(Stack)(({ theme }) => {
 		"& .query-result-filter-form": {
 			flex: 1,
 		},
+		"& .query-result-call-to-action": {
+			overflow: "hidden",
+			flexDirection: "row",
+			gap: "calc(var(--flex-gap)/4)",
+		},
 		"& .centered-thumbnail": {
 			display: "block",
 			marginLeft: "auto",

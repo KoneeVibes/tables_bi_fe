@@ -5,6 +5,8 @@ import { BaseLabel } from "../../../component/form/label/styled";
 import { BaseSelect } from "../../../component/form/select/styled";
 import { BaseOption } from "../../../component/form/option/styled";
 import { SelectedDbTableFieldsPropsType } from "../../../type/container.type";
+import { BaseButton } from "../../../component/button/styled";
+import { useState } from "react";
 
 export const SelectDbTableField: React.FC<SelectedDbTableFieldsPropsType> = ({
 	fields,
@@ -29,6 +31,8 @@ export const SelectDbTableField: React.FC<SelectedDbTableFieldsPropsType> = ({
 		jsonb: ["COUNT"],
 		default: ["COUNT"],
 	};
+
+	const [isOpen, setIsOpen] = useState(false);
 
 	const handleChange = (
 		e:
@@ -89,6 +93,17 @@ export const SelectDbTableField: React.FC<SelectedDbTableFieldsPropsType> = ({
 		}));
 	};
 
+	const handleOpenSelect = (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+		if (!isOpen) setIsOpen(true);
+	};
+
+	const handleCloseSelect = () => {
+		setIsOpen(false);
+	};
+
 	return (
 		<SelectDbTableFieldFormWrapper>
 			<Grid container spacing={"var(--flex-gap)"}>
@@ -100,6 +115,9 @@ export const SelectDbTableField: React.FC<SelectedDbTableFieldsPropsType> = ({
 							displayEmpty
 							name="primaryTableFields"
 							onChange={(e) => handleChange(e)}
+							open={isOpen}
+							onClick={handleOpenSelect}
+							onClose={handleCloseSelect}
 							value={formDetails.primaryTableFields.map((f: any) => f.name)}
 							inputProps={{
 								renderValue: (selected: string[]) =>
@@ -302,6 +320,38 @@ export const SelectDbTableField: React.FC<SelectedDbTableFieldsPropsType> = ({
 									</BaseOption>
 								);
 							})}
+							<Box
+								display={"flex"}
+								overflow={"hidden"}
+								padding="calc(var(--basic-padding)/2)"
+								justifyContent={{ tablet: "flex-end" }}
+							>
+								<BaseButton
+									disableElevation
+									variant="contained"
+									sx={{
+										width: {
+											mobile: "100%",
+											tablet: "auto",
+											laptop: "100%",
+											desktop: "auto",
+										},
+									}}
+									onClick={handleCloseSelect}
+								>
+									<Typography
+										variant={"button"}
+										fontFamily={"inherit"}
+										fontWeight={"inherit"}
+										fontSize={"inherit"}
+										lineHeight={"inherit"}
+										color={"inherit"}
+										textTransform={"inherit"}
+									>
+										Done
+									</Typography>
+								</BaseButton>
+							</Box>
 						</BaseSelect>
 					</BaseFieldSet>
 				</Grid>

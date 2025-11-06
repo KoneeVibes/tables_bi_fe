@@ -51,6 +51,14 @@ export const ConnectionWrapper = styled(Stack)(({ theme }) => {
 				border: "1px solid var(--form-label-border-color)",
 				"& .query-result-filter-form": {
 					flex: 1,
+					overflow: "hidden",
+				},
+				"& .query-result-call-to-action": {
+					flex: 1,
+					width: "100%",
+					overflow: "hidden",
+					flexDirection: "row",
+					gap: "calc(var(--flex-gap)/4)",
 				},
 			},
 		},

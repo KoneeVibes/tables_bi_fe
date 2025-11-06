@@ -15,9 +15,12 @@ import { useQuery } from "@tanstack/react-query";
 import { retrieveAllSavedQueryService } from "../../util/savedview/retrieveAllSavedQuery";
 import { useParams } from "react-router-dom";
 import { QueryResultFilterForm } from "../../container/form/queryresultfilter";
-import { ResetIcon } from "../../asset";
+import { ResetIcon, SearchIconLightColorVariant } from "../../asset";
 import connectedTablesThumbnail from "../../asset/image/connected-tables.png";
 import { ResultFilter } from "../../type/container.type";
+import { BaseButton } from "../../component/button/styled";
+import ExcelJS from "exceljs";
+import { saveAs } from "file-saver";
 
 export const QueryResult = () => {
 	const cookies = new Cookies();
@@ -30,6 +33,8 @@ export const QueryResult = () => {
 	const [baseQueryResult, setBaseQueryResult] = useState<
 		Record<string, any>[] | null
 	>(null);
+	const [isExporting, setIsExporting] = useState(false);
+	const [exportError, setExportError] = useState<string | null>(null);
 	const [queryResult, setQueryResult] = useState<Record<string, any>[] | null>(
 		null
 	);
@@ -163,47 +168,15 @@ export const QueryResult = () => {
 		return !isNaN(parseFloat(value)) && isFinite(value);
 	};
 
-	const handleSorting = async (
+	const handleApplyFiltersAndSorting = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
-		e.preventDefault();
+		e.stopPropagation();
 		if (!baseQueryResult) return;
-		let sorted = [...baseQueryResult];
-		resultFilter.sort.forEach(async ({ field, value }) => {
-			if (!field.trim() || !value.trim()) {
-				return;
-			}
-			sorted.sort((a, b) => {
-				const aVal = a[field];
-				const bVal = b[field];
-				if (aVal == null) return 1;
-				if (bVal == null) return -1;
-				const aIsNum = isNumeric(aVal);
-				const bIsNum = isNumeric(bVal);
-				if (aIsNum && bIsNum) {
-					return value.toLowerCase() === "ascending"
-						? parseFloat(aVal) - parseFloat(bVal)
-						: parseFloat(bVal) - parseFloat(aVal);
-				}
-				return value.toLowerCase() === "ascending"
-					? String(aVal).localeCompare(String(bVal))
-					: String(bVal).localeCompare(String(aVal));
-			});
-		});
-		setQueryResult(sorted);
-	};
-
-	const handleFiltering = async (
-		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-	) => {
-		e.preventDefault();
-		if (!baseQueryResult) return;
-		let filtered = [...baseQueryResult];
-		resultFilter.filter.forEach(async ({ field, criteria, value }) => {
-			if (!field.trim() || !criteria.trim() || !String(value).trim()) {
-				return;
-			}
-			filtered = filtered.filter((row) => {
+		let result = [...baseQueryResult];
+		resultFilter.filter.forEach(({ field, criteria, value }) => {
+			if (!field.trim() || !criteria.trim() || !String(value).trim()) return;
+			result = result.filter((row) => {
 				const fieldValue = row[field];
 				if (fieldValue == null) return false;
 				const fieldIsNumeric = isNumeric(fieldValue);
@@ -220,22 +193,85 @@ export const QueryResult = () => {
 					case "not equals":
 						return left !== right;
 					case "greater than":
-						if (!fieldIsNumeric || !valueIsNumeric) return false;
-						return left > right;
+						return fieldIsNumeric && valueIsNumeric && left > right;
 					case "less than":
-						if (!fieldIsNumeric || !valueIsNumeric) return false;
-						return left < right;
+						return fieldIsNumeric && valueIsNumeric && left < right;
 					case "contains":
-						if (fieldIsNumeric) return false;
-						return String(fieldValue)
-							.toLowerCase()
-							.includes(String(value).toLowerCase());
+						return (
+							!fieldIsNumeric &&
+							String(fieldValue)
+								.toLowerCase()
+								.includes(String(value).toLowerCase())
+						);
 					default:
 						return true;
 				}
 			});
 		});
-		setQueryResult(filtered);
+		resultFilter.sort.forEach(({ field, value }) => {
+			if (!field.trim() || !value.trim()) return;
+			result.sort((a, b) => {
+				const aVal = a[field];
+				const bVal = b[field];
+				if (aVal == null) return 1;
+				if (bVal == null) return -1;
+				const aIsNum = isNumeric(aVal);
+				const bIsNum = isNumeric(bVal);
+				if (aIsNum && bIsNum) {
+					return value.toLowerCase() === "ascending"
+						? parseFloat(aVal) - parseFloat(bVal)
+						: parseFloat(bVal) - parseFloat(aVal);
+				}
+				return value.toLowerCase() === "ascending"
+					? String(aVal).localeCompare(String(bVal))
+					: String(bVal).localeCompare(String(aVal));
+			});
+		});
+		setQueryResult(result);
+	};
+
+	const handleExportQuery = async (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.preventDefault();
+		setIsExporting(true);
+		setExportError(null);
+		if (!queryResult || queryResult.length <= 0) {
+			setExportError("No query result available to export.");
+			setIsExporting(false);
+			return;
+		}
+		try {
+			const workbook = new ExcelJS.Workbook();
+			const worksheet = workbook.addWorksheet("Query Table");
+			const columns =
+				queryResult.length > 0
+					? Object.keys(queryResult[0]).map((key) => ({
+							header: key,
+							key,
+							width: 20,
+					  }))
+					: [];
+
+			worksheet.columns = columns;
+			worksheet.addRows(queryResult);
+
+			worksheet.getRow(1).font = { bold: true };
+			worksheet.getRow(1).alignment = { horizontal: "center" };
+
+			const buffer = await workbook.xlsx.writeBuffer();
+			const blob = new Blob([buffer], {
+				type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			});
+			saveAs(blob, `TablesBI - Query Table.xlsx`);
+			setIsExporting(false);
+		} catch (error) {
+			setIsExporting(false);
+			const errorMessage =
+				error instanceof Error ? error.message : "An unexpected error occurred";
+			setExportError(`Query export failed. ${errorMessage}`);
+			console.error("Query export failed:", error);
+		}
 	};
 
 	return (
@@ -261,6 +297,7 @@ export const QueryResult = () => {
 						</Typography>
 					</Box>
 					<Stack
+						flex={{ xl: 0.5 }}
 						direction={{ tablet: "row" }}
 						gap={"calc(var(--flex-gap)/4)"}
 						alignItems={{ tablet: "center" }}
@@ -288,10 +325,45 @@ export const QueryResult = () => {
 								formDetails={resultFilter}
 								fields={resultFilterFields}
 								setFormDetails={setResultFilter}
-								handleSorting={handleSorting}
-								handleFiltering={handleFiltering}
+								handleSorting={handleApplyFiltersAndSorting}
+								handleFiltering={handleApplyFiltersAndSorting}
 							/>
 						</form>
+						<Stack className="query-result-call-to-action">
+							<Box
+								overflow={"hidden"}
+								height={"-webkit-fill-available"}
+								width={{ mobile: "100%", miniTablet: "auto", xl: "100%" }}
+							>
+								<BaseButton
+									disabled={
+										isExporting || !queryResult || queryResult.length === 0
+									}
+									disableElevation
+									variant="contained"
+									sx={{
+										height: "inherit",
+										width: "100%",
+									}}
+									startIcon={<SearchIconLightColorVariant />}
+									padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
+									onClick={handleExportQuery}
+								>
+									<Typography
+										variant={"button"}
+										fontFamily={"inherit"}
+										fontWeight={"inherit"}
+										fontSize={"inherit"}
+										lineHeight={"inherit"}
+										color={"inherit"}
+										textTransform={"inherit"}
+										visibility={isExporting ? "hidden" : "visible"}
+									>
+										Export
+									</Typography>
+								</BaseButton>
+							</Box>
+						</Stack>
 					</Stack>
 				</Stack>
 				<Box
@@ -312,6 +384,20 @@ export const QueryResult = () => {
 								handleCheckRow={handleCheckRow}
 								handleCheckAllRow={handleCheckAllRow}
 							/>
+						</Box>
+					) : exportError ? (
+						<Box>
+							<Typography
+								fontFamily={"Inter"}
+								fontWeight={"600"}
+								fontSize={14}
+								lineHeight={"normal"}
+								color={"var(--error-red-color)"}
+								whiteSpace={"normal"}
+								textAlign={"center"}
+							>
+								{exportError}
+							</Typography>
 						</Box>
 					) : (
 						<Stack gap={"calc(var(--flex-gap)/2)"}>

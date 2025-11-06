@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Box, Checkbox, Grid, Stack, Typography } from "@mui/material";
 import { ConnectedTableFormWrapper } from "./styled";
 import { BaseLabel } from "../../../component/form/label/styled";
@@ -7,6 +7,7 @@ import { BaseOption } from "../../../component/form/option/styled";
 import { ConnectedTablePropsType } from "../../../type/container.type";
 import { BaseFieldSet } from "../../../component/form/fieldset/styled";
 import { AppContext } from "../../../context/appContext";
+import { BaseButton } from "../../../component/button/styled";
 
 export const ConnectedTable: React.FC<ConnectedTablePropsType> = ({
 	fields,
@@ -36,6 +37,8 @@ export const ConnectedTable: React.FC<ConnectedTablePropsType> = ({
 	};
 
 	const { setJoinTableCount } = useContext(AppContext);
+
+	const [isOpen, setIsOpen] = useState(false);
 
 	const uniqueTables = Array.from(
 		new Set(tables.flatMap((item) => [item.source_table, item.target_table]))
@@ -127,6 +130,17 @@ export const ConnectedTable: React.FC<ConnectedTablePropsType> = ({
 		}));
 	};
 
+	const handleOpenSelect = (
+		e: React.MouseEvent<HTMLDivElement, MouseEvent>
+	) => {
+		e.stopPropagation();
+		if (!isOpen) setIsOpen(true);
+	};
+
+	const handleCloseSelect = () => {
+		setIsOpen(false);
+	};
+
 	return (
 		<ConnectedTableFormWrapper>
 			<Grid container spacing={"calc(var(--flex-gap)/2)"}>
@@ -162,6 +176,9 @@ export const ConnectedTable: React.FC<ConnectedTablePropsType> = ({
 								(formDetails[fieldName] ?? []).map((f: any) => f.name) ?? []
 							}
 							onChange={handleChange}
+							open={isOpen}
+							onClick={handleOpenSelect}
+							onClose={handleCloseSelect}
 							inputProps={{
 								renderValue: (selected: string[]) =>
 									selected?.length === 0 ? (
@@ -361,6 +378,38 @@ export const ConnectedTable: React.FC<ConnectedTablePropsType> = ({
 									</Stack>
 								</BaseOption>
 							))}
+							<Box
+								display={"flex"}
+								overflow={"hidden"}
+								padding="calc(var(--basic-padding)/2)"
+								justifyContent={{ tablet: "flex-end" }}
+							>
+								<BaseButton
+									disableElevation
+									variant="contained"
+									sx={{
+										width: {
+											mobile: "100%",
+											tablet: "auto",
+											laptop: "100%",
+											desktop: "auto",
+										},
+									}}
+									onClick={handleCloseSelect}
+								>
+									<Typography
+										variant={"button"}
+										fontFamily={"inherit"}
+										fontWeight={"inherit"}
+										fontSize={"inherit"}
+										lineHeight={"inherit"}
+										color={"inherit"}
+										textTransform={"inherit"}
+									>
+										Done
+									</Typography>
+								</BaseButton>
+							</Box>
 						</BaseSelect>
 					</BaseFieldSet>
 				</Grid>
