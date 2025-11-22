@@ -7,6 +7,7 @@ export const AppContextProvider: React.FC<ContextProviderPropsType> = ({
 	children,
 }) => {
 	const [signUpActiveTabIndex, setSignUpActiveTabIndex] = useState(0);
+	const [signInActiveTabIndex, setSignInActiveTabIndex] = useState(0);
 	const [isSideNavigationClosing, setIsSideNavigationClosing] = useState(false);
 	const [activeNavItem, setActiveNavItem] = useState<string | null>(null);
 	const [isMobileSideNavigationOpen, setIsMobileSideNavigationOpen] =
@@ -36,6 +37,8 @@ export const AppContextProvider: React.FC<ContextProviderPropsType> = ({
 				setJoinTableCount,
 				activeConnection,
 				setActiveConnection,
+				signInActiveTabIndex,
+				setSignInActiveTabIndex,
 			}}
 		>
 			{children}

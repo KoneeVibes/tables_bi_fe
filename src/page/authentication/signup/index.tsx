@@ -4,7 +4,7 @@ import { AuthLayout } from "../../../container/layout/auth";
 import { SignUpForm } from "../../../container/form/signup";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { BaseButton } from "../../../component/button/styled";
-import { SignUpEmailVerificationForm } from "../../../container/form/signupemailverification";
+import { EmailVerificationForm } from "../../../container/form/emailverification";
 import { AppContext } from "../../../context/appContext";
 import { signUpUserService } from "../../../util/authentication/signUp";
 import { verifyAuthOtpService } from "../../../util/authentication/verifyOtp";
@@ -88,7 +88,9 @@ export const SignUp = () => {
 
 	const handleVerifyOtp = async (otp: Record<string, any>) => {
 		try {
-			const response = await verifyAuthOtpService(otp);
+			const response = await verifyAuthOtpService(otp, {
+				deleteOtp: "true",
+			});
 			if (response.status === "success") {
 				setIsLoading(false);
 				setSignUpActiveTabIndex(0);
@@ -113,6 +115,14 @@ export const SignUp = () => {
 		setSignUpActiveTabIndex(0.1);
 		await handleFormSubmit(e, 0.1);
 		return setHasOTPResent(true);
+	};
+
+	const handleNavigateToSignUp = (
+		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		e.preventDefault();
+		setError && setError(null);
+		return setSignUpActiveTabIndex(0);
 	};
 
 	const handleFormSubmit = async (
@@ -162,11 +172,11 @@ export const SignUp = () => {
 					/>
 				)}
 				{(signUpActiveTabIndex === 0.1 || signUpActiveTabIndex === 1) && (
-					<SignUpEmailVerificationForm
+					<EmailVerificationForm
 						error={error}
-						setError={setError}
 						formDetails={formDetails}
 						setFormDetails={setFormDetails}
+						navigateBack={handleNavigateToSignUp}
 					/>
 				)}
 				{(signUpActiveTabIndex === 0.1 || signUpActiveTabIndex === 1) && (

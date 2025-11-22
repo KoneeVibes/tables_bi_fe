@@ -1,22 +1,16 @@
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Box, Grid, Typography } from "@mui/material";
-import { BaseFormPropsType } from "../../../type/container.type";
-import { SignUpEmailVerificationFormWrapper } from "./styled";
+import { EmailVerificationFormPropsType } from "../../../type/container.type";
+import { EmailVerificationFormWrapper } from "./styled";
 import { BaseButton } from "../../../component/button/styled";
 import arrowBackIcon from "../../../asset/icon/arrow-left.svg";
 import { BaseLegend } from "../../../component/form/legend/styled";
 import { BaseFieldSet } from "../../../component/form/fieldset/styled";
 import { BaseInput } from "../../../component/form/input/styled";
-import { AppContext } from "../../../context/appContext";
 
-export const SignUpEmailVerificationForm: React.FC<BaseFormPropsType> = ({
-	error,
-	setError,
-	formDetails,
-	setFormDetails,
-}) => {
-	const { setSignUpActiveTabIndex } = useContext(AppContext);
-
+export const EmailVerificationForm: React.FC<
+	EmailVerificationFormPropsType
+> = ({ error, navigateBack, formDetails, setFormDetails }) => {
 	const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 	const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
 	const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
@@ -54,22 +48,14 @@ export const SignUpEmailVerificationForm: React.FC<BaseFormPropsType> = ({
 		}
 	};
 
-	const handleNavigateToSignUp = (
-		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-	) => {
-		e.preventDefault();
-		setError && setError(null);
-		return setSignUpActiveTabIndex(0);
-	};
-
 	return (
-		<SignUpEmailVerificationFormWrapper>
+		<EmailVerificationFormWrapper>
 			<Box overflow={"hidden"}>
 				<BaseButton
 					disableElevation
 					startIcon={<img src={arrowBackIcon} alt="arrow back icon" />}
 					padding="calc(var(--basic-padding)/4) calc(var(--basic-padding)/2)"
-					onClick={handleNavigateToSignUp}
+					onClick={navigateBack}
 				>
 					<Typography
 						variant={"button"}
@@ -135,6 +121,6 @@ export const SignUpEmailVerificationForm: React.FC<BaseFormPropsType> = ({
 					</Grid>
 				))}
 			</Grid>
-		</SignUpEmailVerificationFormWrapper>
+		</EmailVerificationFormWrapper>
 	);
 };

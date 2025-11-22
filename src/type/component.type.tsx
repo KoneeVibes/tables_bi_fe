@@ -4,6 +4,7 @@ export type BaseTypographyType = {
 	fontsize?: string;
 	fontweight?: number;
 	colour?: string;
+	align?: "left" | "center" | "right";
 };
 
 export type BaseButtonPropsType = BaseTypographyType & {

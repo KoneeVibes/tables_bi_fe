@@ -86,6 +86,10 @@ export type SaveQueryFormPropsType = {
 	handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 };
 
+export type EmailVerificationFormPropsType = {
+	navigateBack: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+} & BaseFormPropsType;
+
 export type SortItem = { field: string; value: string };
 export type FilterItem = { field: string; criteria: string; value: string };
 export type ResultFilter = { sort: SortItem[]; filter: FilterItem[] };

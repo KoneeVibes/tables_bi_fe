@@ -244,6 +244,14 @@ export const SelectDbTableField: React.FC<SelectedDbTableFieldsPropsType> = ({
 												direction={"row"}
 												alignItems={"center"}
 												gap={"calc(var(--flex-gap)/2)"}
+												display={
+													formDetails.primaryTableFields?.some(
+														(f: Record<string, any>) =>
+															f.name === field.column_name
+													)
+														? "flex"
+														: "none"
+												}
 											>
 												<Box>
 													<Typography

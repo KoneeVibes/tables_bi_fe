@@ -21,4 +21,6 @@ export type AppContextType = {
 	setActiveConnection: React.Dispatch<
 		React.SetStateAction<Record<string, any> | null>
 	>;
+	signInActiveTabIndex: number;
+	setSignInActiveTabIndex: React.Dispatch<React.SetStateAction<number>>;
 };

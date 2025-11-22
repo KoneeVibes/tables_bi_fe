@@ -1,15 +1,11 @@
 const BASE_ENDPOINT = process.env.REACT_APP_BASE_API;
 
-export const verifyAuthOtpService = async (
-	payload: any,
-	queryParams: { [key: string]: string }
-) => {
-	const params = new URLSearchParams(queryParams).toString();
+export const resetPasswordService = async (payload: any, userId: string) => {
 	try {
 		const response = await fetch(
-			`${BASE_ENDPOINT}/api/v1/authentication/verify-otp?${params}`,
+			`${BASE_ENDPOINT}/api/v1/authentication/reset-password/${userId}`,
 			{
-				method: "POST",
+				method: "PATCH",
 				credentials: "include",
 				headers: {
 					"Content-Type": "application/json",

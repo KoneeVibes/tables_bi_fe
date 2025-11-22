@@ -302,6 +302,14 @@ export const ConnectedTable: React.FC<ConnectedTablePropsType> = ({
 											direction={"row"}
 											alignItems={"center"}
 											gap={"calc(var(--flex-gap)/2)"}
+											display={
+												(formDetails[fieldName] ?? [])?.some(
+													(f: Record<string, any>) =>
+														f.name === field.column_name
+												)
+													? "flex"
+													: "none"
+											}
 										>
 											<Box>
 												<Typography
