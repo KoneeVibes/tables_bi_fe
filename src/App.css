@@ -270,7 +270,24 @@
 	.save-query-form-modal .MuiDialog-paper {
 		max-width: 25rem;
 		border-radius: 10px;
-		width: -webkit-fill-available;
+	}
+
+	@supports (width: -webkit-fill-available) {
+		.save-query-form-modal .MuiDialog-paper {
+			width: -webkit-fill-available;
+		}
+	}
+
+	@supports (width: -moz-available) {
+		.save-query-form-modal .MuiDialog-paper {
+			width: -moz-available;
+		}
+	}
+
+	@supports not (width: -moz-available) {
+		.save-query-form-modal .MuiDialog-paper {
+			width: stretch;
+		}
 	}
 
 	/* below are styles pertaining to the save-query form modal */

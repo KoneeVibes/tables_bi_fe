@@ -2,7 +2,10 @@ import { Box, Grid, IconButton, Stack, Typography } from "@mui/material";
 import { QueryResultFilterFormWrapper } from "./styled";
 import { BaseFieldSet } from "../../../component/form/fieldset/styled";
 import { BaseSelect } from "../../../component/form/select/styled";
-import { QueryResultFilterPropsType } from "../../../type/container.type";
+import {
+	FilterItem,
+	QueryResultFilterPropsType,
+} from "../../../type/container.type";
 import { BaseOption } from "../../../component/form/option/styled";
 import filterIcon from "../../../asset/icon/filter-icon.svg";
 import sortIcon from "../../../asset/icon/sort-icon.svg";
@@ -19,13 +22,29 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 	handleFiltering,
 }) => {
 	const sortBy = ["ascending", "descending"];
-	const criteria = [
-		"equals",
-		"not equals",
-		"greater than",
-		"less than",
-		"contains",
-	];
+	const criteria = {
+		text: ["equals", "not equals", "contains"],
+		varchar: ["equals", "not equals", "contains"],
+		integer: ["equals", "not equals", "greater than", "less than"],
+		bigint: ["equals", "not equals", "greater than", "less than"],
+		float4: ["equals", "greater than", "less than"],
+		numeric: ["equals", "greater than", "less than"],
+		boolean: ["equals", "not equals"],
+		date: ["equals", "greater than", "less than", "between"],
+		timestamp: ["equals", "greater than", "less than", "between"],
+		timestamptz: ["equals", "greater than", "less than", "between"],
+		"text[]": ["contains"],
+		json: ["contains"],
+		jsonb: ["contains"],
+		_default: [
+			"equals",
+			"not equals",
+			"greater than",
+			"less than",
+			"contains",
+			"between",
+		],
+	};
 
 	const [isSortSelectOpen, setIsSortSelectOpen] = useState(false);
 	const [isFilterSelectOpen, setIsFilterSelectOpen] = useState(false);
@@ -40,14 +59,68 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 						name: string;
 					};
 			  }),
-		type: "sort" | "filter",
+		kind: "sort" | "filter",
 		index: number
 	) => {
 		const { name, value } = e.target;
+		const stringValue = String(value);
+		if (name === "field") {
+			const selectedField = fields.find((f) => f.name === stringValue);
+			setFormDetails((prev) => ({
+				...prev,
+				[kind]: prev[kind].map((item, i) =>
+					i === index
+						? {
+								...item,
+								field: stringValue,
+								...(kind === "sort"
+									? { value: "" }
+									: {
+											type: selectedField?.type || "",
+											criteria: "",
+											value: "",
+											start: "",
+											end: "",
+									  }),
+						  }
+						: item
+				),
+			}));
+			return;
+		}
+		if (kind === "filter" && (name === "start" || name === "end")) {
+			setFormDetails((prev) => {
+				const old = prev[kind][index];
+				const start = name === "start" ? stringValue : old.start || "";
+				const end = name === "end" ? stringValue : old.end || "";
+				return {
+					...prev,
+					[kind]: prev[kind].map((item, i) =>
+						i === index
+							? {
+									...item,
+									start,
+									end,
+									value: start && end ? `${start} to ${end}` : "",
+							  }
+							: item
+					),
+				};
+			});
+			return;
+		}
 		setFormDetails((prev) => ({
 			...prev,
-			[type]: prev[type].map((item, i) =>
-				i === index ? { ...item, [name]: value } : item
+			[kind]: prev[kind].map((item, i) =>
+				i === index
+					? {
+							...item,
+							[name]: value,
+							...(name === "criteria" && !["between"].includes(String(value))
+								? { start: "", end: "" }
+								: {}),
+					  }
+					: item
 			),
 		}));
 	};
@@ -66,7 +139,7 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 					[type]: [
 						type === "sort"
 							? { field: "", value: "" }
-							: { field: "", criteria: "", value: "" },
+							: { field: "", type: "", criteria: "", value: "" },
 					],
 				};
 			}
@@ -88,7 +161,14 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 				...prev[type],
 				type === "sort"
 					? { field: "", value: "" }
-					: { field: "", criteria: "", value: "" },
+					: {
+							field: "",
+							type: "",
+							criteria: "",
+							value: "",
+							start: "",
+							end: "",
+					  },
 			],
 		}));
 	};
@@ -103,7 +183,14 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 			[type]: [
 				type === "sort"
 					? { field: "", value: "" }
-					: { field: "", criteria: "", value: "" },
+					: {
+							field: "",
+							type: "",
+							criteria: "",
+							value: "",
+							start: "",
+							end: "",
+					  },
 			],
 		}));
 	};
@@ -277,8 +364,8 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 													>
 														{fields?.map((field, index) => {
 															return (
-																<BaseOption key={index} value={field}>
-																	{field}
+																<BaseOption key={index} value={field.name}>
+																	{field.name}
 																</BaseOption>
 															);
 														})}
@@ -529,7 +616,7 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 										Filters
 									</Typography>
 								</Box>
-								{formDetails.filter.map((f, index) => {
+								{formDetails.filter.map((f: FilterItem, index) => {
 									return (
 										<BaseOption
 											key={index}
@@ -591,8 +678,8 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 													>
 														{fields?.map((field, index) => {
 															return (
-																<BaseOption key={index} value={field}>
-																	{field}
+																<BaseOption key={index} value={field.name}>
+																	{field.name}
 																</BaseOption>
 															);
 														})}
@@ -640,42 +727,91 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 															},
 														}}
 													>
-														{criteria?.map((c, index) => {
-															return (
-																<BaseOption key={index} value={c}>
-																	{c
-																		.split(" ")
-																		.map((word) =>
-																			word
-																				? word.charAt(0).toUpperCase() +
-																				  word.slice(1)
-																				: word
-																		)
-																		.join(" ")}
-																</BaseOption>
-															);
-														})}
+														{(
+															criteria[f.type as keyof typeof criteria] ??
+															criteria._default
+														).map((c, index) => (
+															<BaseOption key={index} value={c}>
+																{c
+																	.split(" ")
+																	.map((word) =>
+																		word
+																			? word.charAt(0).toUpperCase() +
+																			  word.slice(1)
+																			: word
+																	)
+																	.join(" ")}
+															</BaseOption>
+														))}
 													</BaseSelect>
 												</Box>
-												<Box
-													flex={1}
-													overflow={"hidden"}
-													onClick={(e) => e.stopPropagation()}
-													onMouseDown={(e) => e.stopPropagation()}
-												>
-													<BaseInput
-														fullWidth
-														name="value"
-														value={f.value}
-														placeholder="Value"
-														onChange={(e) => handleChange(e, "filter", index)}
-														sx={{
-															"&.Mui-focused": {
-																border: "1px solid var(--primary-color)",
-															},
-														}}
-													/>
-												</Box>
+												{["date", "timestamp", "timestamptz"].includes(
+													f.type
+												) && ["between"].includes(f.criteria) ? (
+													<Stack
+														flex={2}
+														direction={"row"}
+														overflow={"hidden"}
+														alignItems={"center"}
+														gap={"calc(var(--flex-gap)/2)"}
+														width={"-webkit-fill-available"}
+														onClick={(e) => e.stopPropagation()}
+														onMouseDown={(e) => e.stopPropagation()}
+													>
+														<Box flex={1} overflow={"hidden"}>
+															<BaseInput
+																fullWidth
+																type="date"
+																name="start"
+																value={f.start || ""}
+																onChange={(e) =>
+																	handleChange(e, "filter", index)
+																}
+																sx={{
+																	"&.Mui-focused": {
+																		border: "1px solid var(--primary-color)",
+																	},
+																}}
+															/>
+														</Box>
+														<Box flex={1} overflow={"hidden"}>
+															<BaseInput
+																fullWidth
+																type="date"
+																name="end"
+																value={f.end || ""}
+																onChange={(e) =>
+																	handleChange(e, "filter", index)
+																}
+																sx={{
+																	"&.Mui-focused": {
+																		border: "1px solid var(--primary-color)",
+																	},
+																}}
+															/>
+														</Box>
+													</Stack>
+												) : (
+													<Box
+														flex={1}
+														overflow={"hidden"}
+														onClick={(e) => e.stopPropagation()}
+														onMouseDown={(e) => e.stopPropagation()}
+													>
+														<BaseInput
+															fullWidth
+															name="value"
+															value={f.value}
+															placeholder="Value"
+															onChange={(e) => handleChange(e, "filter", index)}
+															sx={{
+																"&.Mui-focused": {
+																	border: "1px solid var(--primary-color)",
+																},
+															}}
+														/>
+													</Box>
+												)}
 												<Box
 													flexShrink={0}
 													onClick={(e) => e.stopPropagation()}

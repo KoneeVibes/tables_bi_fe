@@ -21,7 +21,6 @@ export const DashboardWrapper = styled(Stack)(({ theme }) => {
 			"& .datasource-fieldset": {
 				cursor: "pointer",
 				borderRadius: "10px",
-				height: "-webkit-fill-available",
 				padding: "calc(var(--basic-padding)/2)",
 				border: "1px solid var(--form-label-border-color)",
 				"& label": {
@@ -50,6 +49,15 @@ export const DashboardWrapper = styled(Stack)(({ theme }) => {
 				"& .datasource-icon": {
 					width: "100%",
 					height: "auto",
+				},
+				"@supports (height: -webkit-fill-available)": {
+					height: "-webkit-fill-available",
+				},
+				"@supports (height: -moz-available)": {
+					height: "-moz-available",
+				},
+				"@supports not (height: -moz-available)": {
+					height: "stretch",
 				},
 			},
 		},

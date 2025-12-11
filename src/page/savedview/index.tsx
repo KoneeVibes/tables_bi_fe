@@ -240,7 +240,6 @@ export const SavedView = () => {
 				handleCloseQueryMenu();
 				break;
 		}
-		handleCloseQueryMenu();
 	};
 
 	const handleDropDownClickOutside = useCallback(

@@ -99,10 +99,14 @@ export const Connection = () => {
 			? JSON.parse(localStorage.getItem("dataSource") as string)
 			: { name: "" }
 	);
-	const [resultFilterFields, setResultFilterFields] = useState<string[]>([]);
+	const [resultFilterFields, setResultFilterFields] = useState<
+		{ name: string; type: string }[]
+	>([]);
 	const [resultFilter, setResultFilter] = useState<ResultFilter>({
 		sort: [{ field: "", value: "" }],
-		filter: [{ field: "", criteria: "", value: "" }],
+		filter: [
+			{ field: "", type: "", criteria: "", value: "", start: "", end: "" },
+		],
 	});
 	const [dbTables, setDbTables] = useState<Record<string, any>[]>([]);
 	const [tableRelationship, setTableRelationship] = useState<Record<
@@ -494,7 +498,9 @@ export const Connection = () => {
 		e.preventDefault();
 		setResultFilter({
 			sort: [{ field: "", value: "" }],
-			filter: [{ field: "", criteria: "", value: "" }],
+			filter: [
+				{ field: "", type: "", criteria: "", value: "", start: "", end: "" },
+			],
 		});
 		await handleJoinTable(e);
 		return;
@@ -511,45 +517,60 @@ export const Connection = () => {
 		e.stopPropagation();
 		if (!baseQueryResult) return;
 		let result = [...baseQueryResult];
-		resultFilter.filter.forEach(({ field, criteria, value }) => {
-			if (!field.trim() || !criteria.trim() || !String(value).trim()) return;
-			result = result.filter((row) => {
-				const fieldValue = row[field];
-				if (fieldValue == null) return false;
-				const fieldIsNumeric = isNumeric(fieldValue);
-				const valueIsNumeric = isNumeric(value);
-				const left = fieldIsNumeric
-					? parseFloat(fieldValue)
-					: String(fieldValue).toLowerCase();
-				const right = valueIsNumeric
-					? parseFloat(value)
-					: String(value).toLowerCase();
-				switch (criteria.toLowerCase()) {
-					case "equals":
-						return left === right;
-					case "not equals":
-						return left !== right;
-					case "greater than":
-						return fieldIsNumeric && valueIsNumeric && left > right;
-					case "less than":
-						return fieldIsNumeric && valueIsNumeric && left < right;
-					case "contains":
-						return (
-							!fieldIsNumeric &&
-							String(fieldValue)
-								.toLowerCase()
-								.includes(String(value).toLowerCase())
-						);
-					default:
-						return true;
-				}
-			});
-		});
+		resultFilter.filter.forEach(
+			({ field, criteria, type, value, start, end }) => {
+				if (!field.trim() || !criteria.trim()) return;
+				const isBetween = criteria.toLowerCase() === "between";
+				const isDateType = ["date", "timestamp", "timestamptz"].includes(type);
+				if (!isBetween && !String(value).trim()) return;
+				result = result.filter((row) => {
+					const fieldValue = row[field]?.value;
+					if (fieldValue == null) return false;
+					if (isBetween && isDateType) {
+						if (!start || !end) return true;
+						const rowDate = new Date(fieldValue);
+						const startDate = new Date(start);
+						const endDate = new Date(end);
+						rowDate.setHours(0, 0, 0, 0);
+						startDate.setHours(0, 0, 0, 0);
+						endDate.setHours(23, 59, 59, 999);
+						return rowDate >= startDate && rowDate <= endDate;
+					}
+					const fieldIsNumeric = isNumeric(fieldValue);
+					const valueIsNumeric = isNumeric(value);
+					const left = fieldIsNumeric
+						? parseFloat(fieldValue)
+						: String(fieldValue).toLowerCase().trim();
+					const right = valueIsNumeric
+						? parseFloat(value)
+						: String(value).toLowerCase().trim();
+					switch (criteria.toLowerCase()) {
+						case "equals":
+							return left === right;
+						case "not equals":
+							return left !== right;
+						case "greater than":
+							return fieldIsNumeric && valueIsNumeric && left > right;
+						case "less than":
+							return fieldIsNumeric && valueIsNumeric && left < right;
+						case "contains":
+							return (
+								!fieldIsNumeric &&
+								String(fieldValue)
+									.toLowerCase()
+									.includes(String(value).toLowerCase())
+							);
+						default:
+							return true;
+					}
+				});
+			}
+		);
 		resultFilter.sort.forEach(({ field, value }) => {
 			if (!field.trim() || !value.trim()) return;
 			result.sort((a, b) => {
-				const aVal = a[field];
-				const bVal = b[field];
+				const aVal = a[field]?.value;
+				const bVal = b[field]?.value;
 				if (aVal == null) return 1;
 				if (bVal == null) return -1;
 				const aIsNum = isNumeric(aVal);
@@ -635,10 +656,18 @@ export const Connection = () => {
 				setIsJoining(false);
 				setQueryResult(response.data);
 				setBaseQueryResult(response.data);
-				const fields: string[] = (response.data ?? []).flatMap(
-					(result: Record<string, any>) => Object.keys(result ?? {})
+				const fields: { name: string; type: string }[] = (
+					response.data ?? []
+				).flatMap((row: Record<string, any>) =>
+					Object.entries(row ?? {}).map(([key, value]) => ({
+						name: key,
+						type: value?.type ?? "unknown",
+					}))
 				);
-				setResultFilterFields(Array.from(new Set(fields)));
+				const uniqueFields = Array.from(
+					new Map(fields.map((f) => [f.name, f])).values()
+				);
+				setResultFilterFields(uniqueFields);
 				return response.data;
 			} else {
 				setIsJoining(false);

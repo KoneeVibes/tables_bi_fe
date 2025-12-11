@@ -54,7 +54,7 @@ export type ConnectedTablePropsType = {
 } & BaseFormPropsType;
 
 export type QueryResultFilterPropsType = {
-	fields: string[];
+	fields: { name: string; type: string }[];
 	handleSorting: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 	handleFiltering: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 } & BaseFormPropsType<ResultFilter>;
@@ -91,5 +91,12 @@ export type EmailVerificationFormPropsType = {
 } & BaseFormPropsType;
 
 export type SortItem = { field: string; value: string };
-export type FilterItem = { field: string; criteria: string; value: string };
+export type FilterItem = {
+	field: string;
+	type: string;
+	criteria: string;
+	value: string;
+	start: string;
+	end: string;
+};
 export type ResultFilter = { sort: SortItem[]; filter: FilterItem[] };
