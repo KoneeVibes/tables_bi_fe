@@ -389,7 +389,7 @@ export const Dashboard = () => {
 					<form className="datasource-form">
 						<Grid container component={"div"} spacing={"var(--flex-gap)"}>
 							{supportedDataSources.map((source, index) => (
-								<Grid key={index} size={{ mobile: 6 }}>
+								<Grid display={"flex"} key={index} size={{ mobile: 6 }}>
 									<BaseFieldSet className="datasource-fieldset">
 										<BaseLabel>
 											<Box display={"flex"} justifyContent={"flex-end"}>

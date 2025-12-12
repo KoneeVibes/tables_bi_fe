@@ -776,7 +776,10 @@ export const Connection = () => {
 					: [];
 
 			worksheet.columns = columns;
-			worksheet.addRows(queryResult);
+			const cleanedRows = queryResult.map((row) =>
+				columns.map((col) => row[col.header]?.value ?? "")
+			);
+			worksheet.addRows(cleanedRows);
 
 			worksheet.getRow(1).font = { bold: true };
 			worksheet.getRow(1).alignment = { horizontal: "center" };

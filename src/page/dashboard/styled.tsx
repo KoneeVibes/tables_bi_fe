@@ -22,9 +22,12 @@ export const DashboardWrapper = styled(Stack)(({ theme }) => {
 				cursor: "pointer",
 				borderRadius: "10px",
 				padding: "calc(var(--basic-padding)/2)",
+				width: "-webkit-fill-available",
+				display: "flex",
+				flexDirection: "column",
 				border: "1px solid var(--form-label-border-color)",
 				"& label": {
-					height: "100%",
+					flex: 1,
 					display: "flex",
 					marginBlock: "0",
 					cursor: "pointer",
@@ -49,15 +52,6 @@ export const DashboardWrapper = styled(Stack)(({ theme }) => {
 				"& .datasource-icon": {
 					width: "100%",
 					height: "auto",
-				},
-				"@supports (height: -webkit-fill-available)": {
-					height: "-webkit-fill-available",
-				},
-				"@supports (height: -moz-available)": {
-					height: "-moz-available",
-				},
-				"@supports not (height: -moz-available)": {
-					height: "stretch",
 				},
 			},
 		},
