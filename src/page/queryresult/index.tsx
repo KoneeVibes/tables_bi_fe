@@ -350,10 +350,9 @@ export const QueryResult = () => {
 						gap={"calc(var(--flex-gap)/4)"}
 						alignItems={{ tablet: "center" }}
 					>
-						<Box overflow={"hidden"} height={"-webkit-fill-available"}>
+						<Box overflow={"hidden"}>
 							<IconButton
 								sx={{
-									height: "inherit",
 									borderRadius: "12px",
 									padding: "calc(var(--basic-padding)/4)",
 									backgroundColor: "var(--stepper-color)",
@@ -380,7 +379,6 @@ export const QueryResult = () => {
 						<Stack className="query-result-call-to-action">
 							<Box
 								overflow={"hidden"}
-								height={"-webkit-fill-available"}
 								width={{ mobile: "100%", miniTablet: "auto", xl: "100%" }}
 							>
 								<BaseButton
@@ -390,7 +388,6 @@ export const QueryResult = () => {
 									disableElevation
 									variant="contained"
 									sx={{
-										height: "inherit",
 										width: "100%",
 									}}
 									startIcon={<SearchIconLightColorVariant />}

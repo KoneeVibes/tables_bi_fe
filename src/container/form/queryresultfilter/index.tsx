@@ -241,18 +241,15 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 						<Stack
 							flex={1}
 							direction={"row"}
-							height={"inherit"}
-							alignItems={"center"}
 							borderRadius={"12px"}
 							gap={"calc(var(--flex-gap)/4)"}
 							border={"1px solid var(--border-color)"}
 						>
 							<Box
 								display={"flex"}
-								height={"inherit"}
 								alignItems={"center"}
 								justifyContent={"center"}
-								borderRadius={"12px 0 0 12px"}
+								borderRadius={"11px 0 0 11px"}
 								bgcolor={"var(--stepper-color)"}
 								padding={"calc(var(--basic-padding)/4)"}
 							>
@@ -556,18 +553,15 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 						<Stack
 							flex={1}
 							direction={"row"}
-							height={"inherit"}
-							alignItems={"center"}
 							borderRadius={"12px"}
 							gap={"calc(var(--flex-gap)/4)"}
 							border={"1px solid var(--border-color)"}
 						>
 							<Box
 								display={"flex"}
-								height={"inherit"}
 								alignItems={"center"}
 								justifyContent={"center"}
-								borderRadius={"12px 0 0 12px"}
+								borderRadius={"11px 0 0 11px"}
 								bgcolor={"var(--stepper-color)"}
 								padding={"calc(var(--basic-padding)/4)"}
 							>

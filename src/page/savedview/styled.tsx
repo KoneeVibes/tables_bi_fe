@@ -8,7 +8,6 @@ export const SavedViewWrapper = styled(Stack)(({ theme }) => {
 			gap: "calc(var(--flex-gap)/2)",
 			justifyContent: "space-between",
 			width: "-webkit-fill-available",
-			// flexDirection: "column-reverse",
 			"& .tabs": {
 				width: "auto",
 				flexDirection: "row",
