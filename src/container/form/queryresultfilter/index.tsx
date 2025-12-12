@@ -236,9 +236,10 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 	return (
 		<QueryResultFilterFormWrapper>
 			<Grid container spacing={"calc(var(--flex-gap)/4)"}>
-				<Grid size={{ mobile: 12, miniTablet: 6 }}>
+				<Grid display={"flex"} size={{ mobile: 12, miniTablet: 6 }}>
 					<BaseFieldSet>
 						<Stack
+							flex={1}
 							direction={"row"}
 							height={"inherit"}
 							alignItems={"center"}
@@ -550,9 +551,10 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 						</Stack>
 					</BaseFieldSet>
 				</Grid>
-				<Grid size={{ mobile: 12, miniTablet: 6 }}>
+				<Grid display={"flex"} size={{ mobile: 12, miniTablet: 6 }}>
 					<BaseFieldSet>
 						<Stack
+							flex={1}
 							direction={"row"}
 							height={"inherit"}
 							alignItems={"center"}

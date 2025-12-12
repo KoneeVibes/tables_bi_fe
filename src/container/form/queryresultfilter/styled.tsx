@@ -4,10 +4,10 @@ export const QueryResultFilterFormWrapper = styled(Stack)(({ theme }) => {
 	return {
 		gap: "var(--flex-gap)",
 		"& fieldset": {
+			flex: 1,
 			display: "flex",
 			flexDirection: "column",
 			overflow: "hidden",
-			height: "-webkit-fill-available",
 			"& .MuiSelect-root": {
 				padding: 0,
 				width: "100%",
