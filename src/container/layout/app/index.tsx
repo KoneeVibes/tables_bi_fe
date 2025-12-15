@@ -71,13 +71,13 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 				avatar={avatar}
 				logoutUser={handleLogoutUser}
 			/>
-			<TopNavigation
+			{/* <TopNavigation
 				username={`${authenticatedUser?.first_name} ${authenticatedUser?.last_name}`}
 				email={`${authenticatedUser?.email}`}
 				avatar={avatar}
 				pageTitle={pageTitle}
 				logoutUser={handleLogoutUser}
-			/>
+			/> */}
 			<MainArea>{children}</MainArea>
 		</AppLayoutWrapper>
 	);
