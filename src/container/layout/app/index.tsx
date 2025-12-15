@@ -65,19 +65,19 @@ export const AppLayout: React.FC<AppLayoutPropsType> = ({
 
 	return (
 		<AppLayoutWrapper id={pageId} maxWidth={false}>
-			{/* <SideNavigation
+			<SideNavigation
 				username={`${authenticatedUser?.first_name} ${authenticatedUser?.last_name}`}
 				email={`${authenticatedUser?.email}`}
 				avatar={avatar}
 				logoutUser={handleLogoutUser}
-			/> */}
-			{/* <TopNavigation
+			/>
+			<TopNavigation
 				username={`${authenticatedUser?.first_name} ${authenticatedUser?.last_name}`}
 				email={`${authenticatedUser?.email}`}
 				avatar={avatar}
 				pageTitle={pageTitle}
 				logoutUser={handleLogoutUser}
-			/> */}
+			/>
 			<MainArea>{children}</MainArea>
 		</AppLayoutWrapper>
 	);
