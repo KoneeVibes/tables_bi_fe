@@ -116,8 +116,16 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 					? {
 							...item,
 							[name]: value,
-							...(name === "criteria" && !["between"].includes(String(value))
-								? { start: "", end: "" }
+							...(kind === "filter" &&
+							name === "criteria" &&
+							!["between"].includes(String(value))
+								? {
+										start: "",
+										end: "",
+										...((item as FilterItem).criteria === "between"
+											? { value: "" }
+											: {}),
+								  }
 								: {}),
 					  }
 					: item
@@ -799,6 +807,13 @@ export const QueryResultFilterForm: React.FC<QueryResultFilterPropsType> = ({
 															name="value"
 															value={f.value}
 															placeholder="Value"
+															type={
+																["date", "timestamp", "timestamptz"].includes(
+																	f.type
+																)
+																	? "date"
+																	: "text"
+															}
 															onChange={(e) => handleChange(e, "filter", index)}
 															sx={{
 																"&.Mui-focused": {

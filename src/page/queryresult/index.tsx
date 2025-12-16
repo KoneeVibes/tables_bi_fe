@@ -201,6 +201,11 @@ export const QueryResult = () => {
 		return !isNaN(parseFloat(value)) && isFinite(value);
 	};
 
+	const sameDay = (a: Date, b: Date) =>
+		a.getFullYear() === b.getFullYear() &&
+		a.getMonth() === b.getMonth() &&
+		a.getDate() === b.getDate();
+
 	const handleApplyFiltersAndSorting = (
 		e: React.MouseEvent<HTMLButtonElement, MouseEvent>
 	) => {
@@ -216,15 +221,27 @@ export const QueryResult = () => {
 				result = result.filter((row) => {
 					const fieldValue = row[field]?.value;
 					if (fieldValue == null) return false;
-					if (isBetween && isDateType) {
-						if (!start || !end) return true;
+					if (isDateType) {
 						const rowDate = new Date(fieldValue);
-						const startDate = new Date(start);
-						const endDate = new Date(end);
-						rowDate.setHours(0, 0, 0, 0);
-						startDate.setHours(0, 0, 0, 0);
-						endDate.setHours(23, 59, 59, 999);
-						return rowDate >= startDate && rowDate <= endDate;
+						if (isBetween) {
+							if (!start || !end) return true;
+							const startDate = new Date(start);
+							const endDate = new Date(end);
+							startDate.setHours(0, 0, 0, 0);
+							endDate.setHours(23, 59, 59, 999);
+							return rowDate >= startDate && rowDate <= endDate;
+						}
+						const compareDate = new Date(value);
+						switch (criteria.toLowerCase()) {
+							case "equals":
+								return sameDay(rowDate, compareDate);
+							case "greater than":
+								return rowDate > compareDate;
+							case "less than":
+								return rowDate < compareDate;
+							default:
+								return true;
+						}
 					}
 					const fieldIsNumeric = isNumeric(fieldValue);
 					const valueIsNumeric = isNumeric(value);

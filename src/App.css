@@ -4,9 +4,8 @@
 	#root {
 		box-sizing: border-box;
 		margin: 0;
-		/* min-height: 100dvh; */
+		min-height: 100vh;
 		background-color: var(--light-color);
-		-webkit-text-size-adjust: 100%;
 
 		--primary-color: #ffab05;
 		--light-color: #ffffff;
